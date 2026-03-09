@@ -5,6 +5,51 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>J1U · CMF Program Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['"Encode Sans"', 'sans-serif'],
+        },
+        colors: {
+          bg: 'var(--bg)',
+          surface: 'var(--surface)',
+          surface2: 'var(--surface2)',
+          border: 'var(--border)',
+          text: 'var(--text)',
+          muted: 'var(--muted)',
+          hdr: 'var(--hdr)',
+          'hdr-text': 'var(--hdr-text)',
+          'hdr-muted': 'var(--hdr-muted)',
+          'badge-bg': 'var(--badge-bg)',
+          'badge-brd': 'var(--badge-brd)',
+          'sop-bg': 'var(--sop-bg)',
+          'btn-bg': 'var(--btn-bg)',
+          'btn-hov': 'var(--btn-hov)',
+          'btn-brd': 'var(--btn-brd)',
+          'tl-track': 'var(--tl-track)',
+          'tl-border': 'var(--tl-border)',
+          'now-line': 'var(--now-line)',
+          'tip-bg': 'var(--tip-bg)',
+          'tip-brd': 'var(--tip-brd)',
+          'tip-text': 'var(--tip-text)',
+          accent: 'var(--accent)',
+          ok: 'var(--ok)',
+          warn: 'var(--warn)',
+          risk: 'var(--risk)',
+          pending: 'var(--pending)',
+          fabric: 'var(--fabric)',
+          paint: 'var(--paint)',
+          texture: 'var(--texture)',
+          milestone: 'var(--milestone)',
+        }
+      }
+    }
+  }
+</script>
 <style>
 /* ═══ PALETTE REFERENCE ═══════════════════════════════════════════════════════
    #00133b  navy   — darkest blue
@@ -83,50 +128,14 @@ html.light {
 }
 
 /* ── TRANSITION ── */
-* { box-sizing:border-box; margin:0; padding:0; }
-body, header, .kpi-card, .stream-card, .timeline-card, .panel, .stat-box,
-.phase-row, .decision-item, .notes-display, .sop-chip, .health,
-.edit-link, #theme-btn {
+body, header, .panel, .notes-display, #theme-btn, .stream-card, .timeline-card {
   transition: background-color 0.25s ease, border-color 0.25s ease,
               color 0.2s ease, box-shadow 0.25s ease;
 }
 
-body    { font-family:'Encode Sans',sans-serif; font-weight:400; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
-header  { background:var(--hdr); border-bottom:1px solid var(--tl-border); padding:16px 36px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
-.header-left  { display:flex; align-items:center; gap:14px; }
-.project-badge { background:var(--badge-bg); border:1px solid var(--badge-brd); color:#ffffff; font-family:'Encode Sans',sans-serif; font-size:12px; padding:5px 13px; border-radius:5px; letter-spacing:0.1em; text-transform:uppercase; }
-.header-title { font-size:16px; font-weight:400; letter-spacing:0.02em; color:var(--hdr-text); }
-.header-sub   { font-size:11px; color:var(--hdr-muted); margin-top:2px; letter-spacing:0.03em; }
-.header-right { display:flex; align-items:center; gap:16px; }
-.hm           { text-align:right; }
-.hm .lbl      { font-size:10px; color:var(--hdr-muted); text-transform:uppercase; letter-spacing:0.08em; }
-.hm .val      { font-size:13px; font-weight:400; color:var(--hdr-text); font-family:'Encode Sans',sans-serif; letter-spacing:0.04em; }
-.sop-chip     { background:var(--sop-bg); border:1px solid var(--badge-brd); padding:7px 15px; border-radius:8px; text-align:center; }
-.sop-chip .lbl { font-size:10px; color:var(--hdr-muted); text-transform:uppercase; letter-spacing:0.08em; }
-.sop-chip .val { font-size:15px; font-weight:400; color:#fbbf24; font-family:'Encode Sans',sans-serif; letter-spacing:0.06em; }
-
-/* Theme toggle button */
-#theme-btn {
-  display:flex; align-items:center; gap:7px;
-  padding:6px 13px; border-radius:7px; cursor:pointer;
-  background:var(--btn-bg); border:1px solid var(--btn-brd);
-  color:#ffffff; font-family:'Encode Sans',sans-serif;
-  font-size:11px; font-weight:400; letter-spacing:0.04em;
-  white-space:nowrap;
-}
-#theme-btn:hover { background:var(--btn-hov); }
-#theme-btn .t-icon { font-size:13px; line-height:1; }
-
-.edit-link { font-size:11px; color:#ffffff; background:var(--btn-bg); border:1px solid var(--btn-brd); padding:6px 13px; border-radius:7px; text-decoration:none; font-weight:400; letter-spacing:0.03em; }
-.edit-link:hover { background:var(--btn-hov); }
-
-/* ── LAYOUT ── */
-.main { padding:24px 36px; display:flex; flex-direction:column; gap:20px; }
-.section-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
-.section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+body { font-family:'Encode Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
 
 /* ── KPI CARDS ── */
-.kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
 .kpi-card { background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:17px; position:relative; overflow:hidden; }
 .kpi-card:hover { border-color:var(--accent); }
 .kpi-card .abar { position:absolute; top:0; left:0; right:0; height:3px; border-radius:11px 11px 0 0; }
@@ -136,7 +145,6 @@ header  { background:var(--hdr); border-bottom:1px solid var(--tl-border); paddi
 .kpi-pill { display:inline-block; font-size:10px; padding:3px 9px; border-radius:20px; margin-top:7px; letter-spacing:0.04em; }
 
 /* ── STREAM CARDS ── */
-.streams-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
 .stream-card  { background:var(--surface); border:1px solid var(--border); border-radius:13px; overflow:hidden; }
 .stream-card:hover { border-color:var(--accent); transform:translateY(-2px); }
 .stream-header { padding:15px 19px 12px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; }
@@ -203,52 +211,66 @@ header  { background:var(--hdr); border-bottom:1px solid var(--tl-border); paddi
 }
 </style>
 </head>
-<body>
-<header>
-  <div class="header-left">
-    <div class="project-badge" id="h-code">J1U</div>
+<body class="font-sans antialiased text-text bg-bg overflow-x-hidden min-h-screen">
+<header class="bg-hdr border-b border-tl-border py-4 px-9 flex items-center justify-between sticky top-0 z-50">
+  <div class="flex items-center gap-3.5">
+    <div class="bg-badge-bg border border-badge-brd text-white text-xs py-1 px-3 rounded text-center tracking-widest uppercase" id="h-code">J1U</div>
     <div>
-      <div class="header-title" id="h-name">CMF Program Dashboard</div>
-      <div class="header-sub">Color, Material &amp; Finish · Vehicle Program Status</div>
+      <div class="text-base text-hdr-text tracking-wide" id="h-name">CMF Program Dashboard</div>
+      <div class="text-[11px] text-hdr-muted mt-0.5 tracking-wider">Color, Material &amp; Finish · Vehicle Program Status</div>
     </div>
   </div>
-  <div class="header-right">
-    <div class="hm"><div class="lbl">Last Refresh</div><div class="val" id="h-date">—</div></div>
-    <div class="hm"><div class="lbl">Days to SOP</div><div class="val" id="h-sop-days" style="color:var(--warn)">—</div></div>
-    <div class="sop-chip"><div class="lbl">SOP Target</div><div class="val" id="h-sop-label">MAR 2028</div></div>
-    <button id="theme-btn" onclick="toggleTheme()">
-      <span class="t-icon" id="t-icon">☀️</span>
+  <div class="flex items-center gap-4">
+    <div class="text-right"><div class="text-[10px] text-hdr-muted uppercase tracking-widest">Last Refresh</div><div class="text-[13px] text-hdr-text tracking-wide mt-0.5" id="h-date">—</div></div>
+    <div class="text-right"><div class="text-[10px] text-hdr-muted uppercase tracking-widest">Days to SOP</div><div class="text-[13px] text-warn tracking-wide mt-0.5" id="h-sop-days">—</div></div>
+    <div class="bg-sop-bg border border-badge-brd py-1.5 px-4 rounded-lg text-center"><div class="text-[10px] text-hdr-muted uppercase tracking-[0.08em]">SOP Target</div><div class="text-[15px] font-normal text-amber-400 tracking-wider" id="h-sop-label">MAR 2028</div></div>
+    <button id="theme-btn" onclick="toggleTheme()" class="flex items-center gap-2 py-1.5 px-3 rounded-md cursor-pointer bg-btn-bg border border-btn-brd text-white font-sans text-[11px] font-normal tracking-wide whitespace-nowrap hover:bg-btn-hov">
+      <span class="text-[13px] leading-none" id="t-icon">☀️</span>
       <span id="t-label">Light Mode</span>
     </button>
-    <a class="edit-link" href="J1U_CMF_Editor.html" target="_blank">✏ Edit Data</a>
+    <a class="text-[11px] text-white bg-btn-bg hover:bg-btn-hov border border-btn-brd py-1.5 px-3 rounded-md no-underline font-normal tracking-wide" href="J1U_CMF_Editor.html" target="_blank">✏ Edit Data</a>
   </div>
 </header>
 
-<div class="main">
-  <div><div class="section-label">Program Overview</div><div class="kpi-grid" id="kpi-grid"></div></div>
-  <div><div class="section-label">CMF Streams</div><div class="streams-grid" id="streams-grid"></div></div>
+<div class="py-6 px-9 flex flex-col gap-5">
   <div>
-    <div class="section-label">Milestone Timeline · <span id="tl-range" style="font-weight:400;text-transform:none;letter-spacing:0">—</span></div>
-    <div class="timeline-card">
-      <div class="tl-header">
-        <div class="tl-title">Program Gantt</div>
-        <div class="legend">
-          <div class="leg-item"><div class="leg-dot" style="background:var(--fabric)"></div>Fabrics</div>
-          <div class="leg-item"><div class="leg-dot" style="background:var(--paint)"></div>Paints</div>
-          <div class="leg-item"><div class="leg-dot" style="background:var(--texture)"></div>Textures</div>
-          <div class="leg-item"><div class="leg-dot" style="background:var(--ok);border-radius:50%"></div>Completed</div>
-          <div class="leg-item"><div style="width:2px;height:12px;background:var(--milestone);border-radius:1px"></div>Gate</div>
-          <div class="leg-item"><div class="leg-dot" style="background:var(--now-line);border-radius:50%"></div>Today</div>
+    <div class="text-[10px] text-muted uppercase tracking-[0.12em] mb-3 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-border">Program Overview</div>
+    <div class="grid grid-cols-3 xl:grid-cols-5 gap-3" id="kpi-grid"></div>
+  </div>
+  <div>
+    <div class="text-[10px] text-muted uppercase tracking-[0.12em] mb-3 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-border">CMF Streams</div>
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4" id="streams-grid"></div>
+  </div>
+  <div>
+    <div class="text-[10px] text-muted uppercase tracking-[0.12em] mb-3 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-border">Milestone Timeline · <span id="tl-range" class="font-normal normal-case tracking-normal">—</span></div>
+    <div class="bg-surface border border-border rounded-xl py-5 px-6 timeline-card">
+      <div class="flex justify-between items-center mb-5 flex-wrap gap-3">
+        <div class="text-[13px] font-normal tracking-wide">Program Gantt</div>
+        <div class="flex gap-4 flex-wrap">
+          <div class="flex items-center gap-1.5 text-[10px] text-muted tracking-wide"><div class="w-[9px] h-[9px] rounded-sm bg-fabric"></div>Fabrics</div>
+          <div class="flex items-center gap-1.5 text-[10px] text-muted tracking-wide"><div class="w-[9px] h-[9px] rounded-sm bg-paint"></div>Paints</div>
+          <div class="flex items-center gap-1.5 text-[10px] text-muted tracking-wide"><div class="w-[9px] h-[9px] rounded-sm bg-texture"></div>Textures</div>
+          <div class="flex items-center gap-1.5 text-[10px] text-muted tracking-wide"><div class="w-[9px] h-[9px] rounded-full bg-ok"></div>Completed</div>
+          <div class="flex items-center gap-1.5 text-[10px] text-muted tracking-wide"><div class="w-[2px] h-3 bg-milestone rounded-sm"></div>Gate</div>
+          <div class="flex items-center gap-1.5 text-[10px] text-muted tracking-wide"><div class="w-[9px] h-[9px] rounded-full bg-now-line"></div>Today</div>
         </div>
       </div>
-      <div style="overflow-x:auto;padding-bottom:6px">
-        <div id="timeline-container" style="min-width:860px;position:relative;padding-bottom:4px;"></div>
+      <div class="overflow-x-auto pb-1.5">
+        <div id="timeline-container" class="min-w-[860px] relative pb-1"></div>
       </div>
     </div>
   </div>
-  <div class="bottom-grid">
-    <div class="panel"><div class="panel-title">⚡ Decisions Needed</div><div class="panel-sub">Items requiring managerial attention</div><div id="decisions-panel"></div></div>
-    <div class="panel"><div class="panel-title">📝 Manager Notes</div><div class="panel-sub">Edit in the <a href="J1U_CMF_Editor.html" target="_blank" style="color:var(--accent)">Data Editor</a></div><div class="notes-display" id="notes-display">—</div></div>
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+    <div class="bg-surface border border-border rounded-xl p-5 panel">
+      <div class="text-[13px] font-normal mb-1 tracking-wide">⚡ Decisions Needed</div>
+      <div class="text-[11px] text-muted mb-3">Items requiring managerial attention</div>
+      <div id="decisions-panel"></div>
+    </div>
+    <div class="bg-surface border border-border rounded-xl p-5 panel">
+      <div class="text-[13px] font-normal mb-1 tracking-wide">📝 Manager Notes</div>
+      <div class="text-[11px] text-muted mb-3">Edit in the <a href="J1U_CMF_Editor.html" target="_blank" class="text-accent underline">Data Editor</a></div>
+      <div class="bg-surface2 border border-border rounded-md p-3 font-sans text-xs leading-[1.8] whitespace-pre-wrap min-h-[90px] notes-display" id="notes-display">—</div>
+    </div>
   </div>
 </div>
 
@@ -287,20 +309,20 @@ function renderKPIs(){
   const pct=ta?Math.round(tok/ta*100):0;
   const cfg=DATA.config;
   document.getElementById('kpi-grid').innerHTML=`
-    <div class="kpi-card"><div class="abar" style="background:var(--accent)"></div>
-      <div class="kl">Total Activities</div><div class="kv">${ta}</div><div class="ks">Across 3 CMF streams</div></div>
-    <div class="kpi-card"><div class="abar" style="background:var(--ok)"></div>
-      <div class="kl">Completed (OK)</div><div class="kv" style="color:var(--ok)">${tok}</div>
-      <div class="kpi-pill" style="background:rgba(52,211,153,.12);color:var(--ok);border:1px solid rgba(52,211,153,.28)">${pct}% Done</div></div>
-    <div class="kpi-card"><div class="abar" style="background:var(--warn)"></div>
-      <div class="kl">To Confirm (TBC)</div><div class="kv" style="color:var(--warn)">${ttbc}</div>
-      <div class="kpi-pill" style="background:rgba(251,191,36,.12);color:var(--warn);border:1px solid rgba(251,191,36,.28)">Needs Decision</div></div>
-    <div class="kpi-card"><div class="abar" style="background:var(--pending)"></div>
-      <div class="kl">Pending / Upcoming</div><div class="kv" style="color:var(--pending)">${ta-tok-ttbc}</div><div class="ks">Not yet started</div></div>
-    <div class="kpi-card"><div class="abar" style="background:var(--accent)"></div>
-      <div class="kl">Next Gate</div>
-      <div class="kv" style="font-size:17px;color:var(--accent);margin-top:5px">${cfg.nextGate||'—'}</div>
-      <div class="ks">${cfg.nextGateDetail||''}</div></div>`;
+    <div class="bg-surface border border-border rounded-[11px] p-[17px] relative overflow-hidden hover:border-accent kpi-card"><div class="absolute top-0 left-0 right-0 h-[3px] rounded-t-[11px]" style="background:var(--accent)"></div>
+      <div class="text-[10px] text-muted uppercase tracking-[0.09em] mb-1.5">Total Activities</div><div class="text-[28px] font-normal leading-none">${ta}</div><div class="text-[11px] text-muted mt-1.5">Across 3 CMF streams</div></div>
+    <div class="bg-surface border border-border rounded-[11px] p-[17px] relative overflow-hidden hover:border-accent kpi-card"><div class="absolute top-0 left-0 right-0 h-[3px] rounded-t-[11px]" style="background:var(--ok)"></div>
+      <div class="text-[10px] text-muted uppercase tracking-[0.09em] mb-1.5">Completed (OK)</div><div class="text-[28px] font-normal leading-none" style="color:var(--ok)">${tok}</div>
+      <div class="inline-block text-[10px] py-[3px] px-[9px] rounded-full mt-1.5 tracking-[0.04em]" style="background:rgba(52,211,153,.12);color:var(--ok);border:1px solid rgba(52,211,153,.28)">${pct}% Done</div></div>
+    <div class="bg-surface border border-border rounded-[11px] p-[17px] relative overflow-hidden hover:border-accent kpi-card"><div class="absolute top-0 left-0 right-0 h-[3px] rounded-t-[11px]" style="background:var(--warn)"></div>
+      <div class="text-[10px] text-muted uppercase tracking-[0.09em] mb-1.5">To Confirm (TBC)</div><div class="text-[28px] font-normal leading-none" style="color:var(--warn)">${ttbc}</div>
+      <div class="inline-block text-[10px] py-[3px] px-[9px] rounded-full mt-1.5 tracking-[0.04em]" style="background:rgba(251,191,36,.12);color:var(--warn);border:1px solid rgba(251,191,36,.28)">Needs Decision</div></div>
+    <div class="bg-surface border border-border rounded-[11px] p-[17px] relative overflow-hidden hover:border-accent kpi-card"><div class="absolute top-0 left-0 right-0 h-[3px] rounded-t-[11px]" style="background:var(--pending)"></div>
+      <div class="text-[10px] text-muted uppercase tracking-[0.09em] mb-1.5">Pending / Upcoming</div><div class="text-[28px] font-normal leading-none" style="color:var(--pending)">${ta-tok-ttbc}</div><div class="text-[11px] text-muted mt-1.5">Not yet started</div></div>
+    <div class="bg-surface border border-border rounded-[11px] p-[17px] relative overflow-hidden hover:border-accent kpi-card"><div class="absolute top-0 left-0 right-0 h-[3px] rounded-t-[11px]" style="background:var(--accent)"></div>
+      <div class="text-[10px] text-muted uppercase tracking-[0.09em] mb-1.5">Next Gate</div>
+      <div class="text-[17px] font-normal leading-none mt-1.5" style="color:var(--accent)">${cfg.nextGate||'—'}</div>
+      <div class="text-[11px] text-muted mt-1.5">${cfg.nextGateDetail||''}</div></div>`;
 }
 
 // ── RENDER STREAMS ────────────────────────────────────────────────────────────
@@ -320,29 +342,29 @@ function renderStreams(){
     const pp=acts.length?Math.round(ok/acts.length*100):0;
     const color=colors[s];
     const ms=DATA.milestones||[];
-    html+=`<div class="stream-card">
-      <div class="stream-header">
-        <div><div class="stream-icon">${SI[s]}</div>
-          <div class="stream-name" style="color:${color}">${SL[s]}</div>
-          <div class="stream-sub">CMF Micro · ${acts.length} Activities</div></div>
-        <div class="health ${hc[s]}">${hl[s]}</div>
+    html+=`<div class="bg-surface border border-border rounded-[13px] overflow-hidden stream-card hover:border-accent hover:-translate-y-[2px]">
+      <div class="py-[15px] px-[19px] border-b border-border flex items-start justify-between">
+        <div><div class="text-[19px] mb-1">${SI[s]}</div>
+          <div class="text-[14px] font-normal tracking-wide" style="color:${color}">${SL[s]}</div>
+          <div class="text-[11px] text-muted mt-0.5">CMF Micro · ${acts.length} Activities</div></div>
+        <div class="text-[10px] py-[4px] px-[10px] rounded-full uppercase tracking-wider ${hc[s]}">${hl[s]}</div>
       </div>
-      <div class="stream-body">
-        <div class="prog-wrap">
-          <div class="prog-label"><span>Overall Progress</span><span style="color:${color}">${pp}%</span></div>
-          <div class="prog-bg"><div class="prog-fill" style="width:${pp}%;background:${color}"></div></div>
+      <div class="py-[15px] px-[19px]">
+        <div class="mb-[15px]">
+          <div class="flex justify-between mb-1"><span class="text-[11px] text-muted">Overall Progress</span><span class="text-[11px] font-normal" style="color:${color}">${pp}%</span></div>
+          <div class="bg-surface2 rounded h-1.5 overflow-hidden"><div class="h-full rounded transition-all duration-700 ease-in-out" style="width:${pp}%;background:${color}"></div></div>
         </div>
-        <div class="stream-stats">
-          <div class="stat-box"><div class="n" style="color:var(--ok)">${ok}</div><div class="l">Done</div></div>
-          <div class="stat-box"><div class="n" style="color:var(--warn)">${tbc}</div><div class="l">TBC</div></div>
-          <div class="stat-box"><div class="n" style="color:var(--muted)">${pend}</div><div class="l">Pending</div></div>
+        <div class="grid grid-cols-3 gap-[7px] mb-3.5">
+          <div class="bg-surface2 rounded-md py-2 px-2.5 text-center"><div class="text-[17px] font-normal" style="color:var(--ok)">${ok}</div><div class="text-[10px] text-muted uppercase mt-[1px] tracking-wider">Done</div></div>
+          <div class="bg-surface2 rounded-md py-2 px-2.5 text-center"><div class="text-[17px] font-normal" style="color:var(--warn)">${tbc}</div><div class="text-[10px] text-muted uppercase mt-[1px] tracking-wider">TBC</div></div>
+          <div class="bg-surface2 rounded-md py-2 px-2.5 text-center"><div class="text-[17px] font-normal" style="color:var(--muted)">${pend}</div><div class="text-[10px] text-muted uppercase mt-[1px] tracking-wider">Pending</div></div>
         </div>
-        <div class="phases-title">Program Gates</div>
-        <div class="phases-list">
+        <div class="text-[10px] text-muted uppercase tracking-[0.09em] mb-2">Program Gates</div>
+        <div class="flex flex-col gap-1.5">
           ${ms.map(m=>{
             const isA=m.status==='active';
             const activeBg=isA?`background:${color}1a;border:1px solid ${color}33`:'';
-            return`<div class="phase-row" ${isA?`style="${activeBg}"`:''}><span class="phase-name" ${isA?`style="color:${color}"`:''}>${m.name}</span><span class="phase-date">${fmtDate(m.date)}</span><span class="ps ${sc[m.status]||'s-upcoming'}">${sl[m.status]||m.status}</span></div>`;
+            return`<div class="flex items-center justify-between py-1.5 px-2.5 rounded-md bg-surface2 phase-row" ${isA?`style="${activeBg}"`:''}><span class="text-[11px]" ${isA?`style="color:${color}"`:''}>${m.name}</span><span class="text-[10px] text-muted tracking-wide">${fmtDate(m.date)}</span><span class="text-[10px] py-[2px] px-2 rounded-full uppercase tracking-wider ${sc[m.status]||'s-upcoming'}">${sl[m.status]||m.status}</span></div>`;
           }).join('')}
         </div>
       </div>
@@ -552,12 +574,13 @@ function renderTimeline(){
 
 // ── RENDER DECISIONS ──────────────────────────────────────────────────────────
 function renderDecisions(){
-  const html=DATA.decisions.map(d=>
-    `<div class="decision-item ${d.priority}">
-      <div class="di-title">${d.title}<span class="stream-tag tag-${d.stream}">${d.stream.toUpperCase()}</span></div>
-      <div class="di-sub">${d.detail}</div>
+  const html=DATA.decisions.map(d=>{
+    const borderLeft = d.priority === 'urgent' ? 'border-l-risk' : (d.priority === 'medium' ? 'border-l-warn' : 'border-l-accent');
+    return `<div class="py-2.5 px-3 bg-surface2 rounded-md border-l-[3px] border-l-transparent mb-2 decision-item ${borderLeft}">
+      <div class="text-xs mb-1">${d.title}<span class="text-[9px] py-0.5 px-1.5 rounded ml-1.5 tracking-wider uppercase stream-tag tag-${d.stream}">${d.stream.toUpperCase()}</span></div>
+      <div class="text-[11px] text-muted leading-relaxed">${d.detail}</div>
     </div>`
-  ).join('');
+  }).join('');
   document.getElementById('decisions-panel').innerHTML=html||`<div style="color:var(--muted);font-size:13px">No decisions flagged.</div>`;
 }
 
