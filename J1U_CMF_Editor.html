@@ -18,10 +18,18 @@
           bg: 'var(--bg)',
           surface: 'var(--surface)',
           surface2: 'var(--surface2)',
-          surface3: 'var(--surface3)',
           border: 'var(--border)',
           text: 'var(--text)',
           muted: 'var(--muted)',
+          hdr: 'var(--hdr)',
+          'hdr-text': 'var(--hdr-text)',
+          'hdr-muted': 'var(--hdr-muted)',
+          'badge-bg': 'var(--badge-bg)',
+          'badge-brd': 'var(--badge-brd)',
+          'btn-bg': 'var(--btn-bg)',
+          'btn-hov': 'var(--btn-hov)',
+          'btn-brd': 'var(--btn-brd)',
+          'tl-border': 'var(--tl-border)',
           accent: 'var(--accent)',
           ok: 'var(--ok)',
           warn: 'var(--warn)',
@@ -138,24 +146,24 @@ html.light {
   </div>
 </div>
 
-<header class="bg-surface border-b border-border py-4 px-8 flex items-center justify-between sticky top-0 z-[100]">
-  <div class="flex items-center gap-0">
-    <div class="text-white text-xs py-1 px-3 rounded text-center tracking-widest uppercase bg-gradient-to-br from-[#4f8ef7] to-[#7c3aed]">J1U</div>
-    <div class="ml-3">
-      <div class="text-base font-semibold">CMF Data Editor</div>
-      <div class="text-[11px] text-muted mt-px">Edit data → open dashboard to see updates</div>
+<header class="bg-hdr border-b border-tl-border py-4 px-9 flex items-center justify-between sticky top-0 z-[100]">
+  <div class="flex items-center gap-3.5">
+    <div class="bg-badge-bg border border-badge-brd text-white text-xs py-1 px-3 rounded text-center tracking-widest uppercase" id="h-code">J1U</div>
+    <div>
+      <div class="text-base text-hdr-text font-semibold tracking-wide">CMF Data Editor</div>
+      <div class="text-[11px] text-hdr-muted mt-0.5 tracking-wider">Edit data → open dashboard to see updates</div>
     </div>
   </div>
-  <div class="flex gap-2">
-    <button id="theme-btn" onclick="toggleTheme()" class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border flex items-center gap-1.5">
+  <div class="flex items-center gap-2">
+    <button id="theme-btn" onclick="toggleTheme()" class="flex items-center gap-2 py-1.5 px-3 rounded-md cursor-pointer bg-btn-bg border border-btn-brd text-white font-sans text-[11px] font-normal tracking-wide whitespace-nowrap hover:bg-btn-hov">
       <span class="text-[13px] leading-none" id="t-icon">☀️</span>
       <span id="t-label">Light Mode</span>
     </button>
-    <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border" onclick="exportJSON()">⬇ Export JSON</button>
-    <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border" onclick="document.getElementById('import-file').click()">⬆ Import JSON</button>
+    <button class="flex items-center gap-1.5 py-1.5 px-3 rounded-md cursor-pointer bg-btn-bg border border-btn-brd text-white font-sans text-[11px] font-normal tracking-wide whitespace-nowrap hover:bg-btn-hov" onclick="exportJSON()">⬇ Export JSON</button>
+    <button class="flex items-center gap-1.5 py-1.5 px-3 rounded-md cursor-pointer bg-btn-bg border border-btn-brd text-white font-sans text-[11px] font-normal tracking-wide whitespace-nowrap hover:bg-btn-hov" onclick="document.getElementById('import-file').click()">⬆ Import JSON</button>
     <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
-    <button class="py-2 px-[18px] text-xs rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-ok/15 text-ok border border-ok/30 hover:bg-ok/25" onclick="saveAll()">💾 Save All</button>
-    <a href="J1U_CMF_Dashboard.html" target="_blank"><button class="py-2 px-[18px] text-xs rounded-lg border-none font-semibold cursor-pointer font-sans transition-all duration-150 bg-accent text-white hover:bg-[#3a7de0]">→ Open Dashboard</button></a>
+    <button class="flex items-center gap-1.5 py-1.5 px-3 rounded-md cursor-pointer bg-ok/15 text-ok border border-ok/30 text-[11px] font-normal tracking-wide hover:bg-ok/25" onclick="saveAll()">💾 Save All</button>
+    <a href="J1U_CMF_Dashboard.html" target="_blank" class="flex items-center py-1.5 px-3 rounded-md cursor-pointer bg-accent text-white hover:bg-[#3a7de0] text-[11px] font-normal tracking-wide no-underline">→ Open Dashboard</a>
   </div>
 </header>
 
