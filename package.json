@@ -1,0 +1,13 @@
+{
+  "name": "cmf-dashboard",
+  "version": "1.0.0",
+  "description": "CMF Microplanning Dashboard",
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./src/styles/main.css -o ./dist/styles.css",
+    "watch:css": "npx tailwindcss -i ./src/styles/main.css -o ./dist/styles.css --watch",
+    "serve": "npx http-server ./dist -p 8080"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}

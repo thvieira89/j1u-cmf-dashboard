@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ── DARK (default) ── */
+  :root {
+    --bg:        #00133b;
+    --surface:   #243882;
+    --surface2:  #162354;
+    --border:    rgba(188,188,188,0.15);
+    --text:      #ffffff;
+    --muted:     #bcbcbc;
+    --hdr:       #00133b;
+    --hdr-text:  #ffffff;
+    --hdr-muted: rgba(188,188,188,0.8);
+    --badge-bg:  #243882;
+    --badge-brd: rgba(188,188,188,0.35);
+    --sop-bg:    rgba(36,56,130,0.55);
+    --btn-bg:    #243882;
+    --btn-hov:   #2d469f;
+    --btn-brd:   rgba(188,188,188,0.3);
+    --tl-track:  rgba(36,56,130,0.6);
+    --tl-border: rgba(188,188,188,0.15);
+    --now-line:  #5b9fff;
+    --tip-bg:    #162354;
+    --tip-brd:   rgba(188,188,188,0.2);
+    --tip-text:  #fbbf24;
+    --accent:    #5b9fff;
+    --ok:        #34d399;
+    --warn:      #fbbf24;
+    --risk:      #f87171;
+    --pending:   #a78bfa;
+    --fabric:    #38bdf8;
+    --paint:     #fb923c;
+    --texture:   #c084fc;
+    --milestone: #fbbf24;
+  }
+
+  /* ── LIGHT ── */
+  html.light {
+    --bg:        #f0f3fb;
+    --surface:   #ffffff;
+    --surface2:  #dce3f5;
+    --border:    rgba(36,56,130,0.14);
+    --text:      #00133b;
+    --muted:     #282b34;
+    --hdr:       #243882;
+    --hdr-text:  #ffffff;
+    --hdr-muted: rgba(255,255,255,0.7);
+    --badge-bg:  #00133b;
+    --badge-brd: rgba(255,255,255,0.35);
+    --sop-bg:    rgba(0,19,59,0.07);
+    --btn-bg:    #00133b;
+    --btn-hov:   #243882;
+    --btn-brd:   rgba(255,255,255,0.35);
+    --tl-track:  #dce3f5;
+    --tl-border: rgba(36,56,130,0.12);
+    --now-line:  #243882;
+    --tip-bg:    #243882;
+    --tip-brd:   rgba(255,255,255,0.2);
+    --tip-text:  #fbbf24;
+    --accent:    #243882;
+    --ok:        #059669;
+    --warn:      #b45309;
+    --risk:      #dc2626;
+    --pending:   #6d28d9;
+    --fabric:    #0369a1;
+    --paint:     #c2410c;
+    --texture:   #6d28d9;
+    --milestone: #92400e;
+  }
+
+  body { 
+    @apply font-sans antialiased text-text bg-bg overflow-x-hidden min-h-screen;
+    font-family:'Encode Sans',sans-serif; /* Fallback */
+  }
+
+  /* ── TRANSITION ── */
+  body, header, .panel, .notes-display, #theme-btn, .stream-card, .timeline-card {
+    transition: background-color 0.25s ease, border-color 0.25s ease,
+                color 0.2s ease, box-shadow 0.25s ease;
+  }
+}
+
+@layer utilities {
+  /* ... Custom scrollbar or specific hacks if needed ... */
+}

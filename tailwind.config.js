@@ -1,0 +1,35 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: 'class',
+  content: ["./dist/*.html", "./src/js/*.js"],
+  theme: {
+    extend: {
+      colors: {
+        bg: 'var(--bg)',
+        surface: 'var(--surface)',
+        surface2: 'var(--surface2)',
+        border: 'var(--border)',
+        text: 'var(--text)',
+        muted: 'var(--muted)',
+        hdr: 'var(--hdr)',
+        'hdr-text': 'var(--hdr-text)',
+        'hdr-muted': 'var(--hdr-muted)',
+        'badge-bg': 'var(--badge-bg)',
+        'badge-brd': 'var(--badge-brd)',
+        'sop-bg': 'var(--sop-bg)',
+        'btn-bg': 'var(--btn-bg)',
+        'btn-hov': 'var(--btn-hov)',
+        'btn-brd': 'var(--btn-brd)',
+        accent: 'var(--accent)',
+        ok: 'var(--ok)',
+        warn: 'var(--warn)',
+        risk: 'var(--risk)',
+        pending: 'var(--pending)',
+        fabric: 'var(--fabric)',
+        paint: 'var(--paint)',
+        texture: 'var(--texture)',
+      },
+    },
+  },
+  plugins: [],
+}
