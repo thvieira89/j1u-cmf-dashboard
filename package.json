@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "description": "CMF Microplanning Dashboard",
   "scripts": {
-    "build:css": "npx tailwindcss -i ./src/styles/main.css -o ./dist/styles.css",
-    "watch:css": "npx tailwindcss -i ./src/styles/main.css -o ./dist/styles.css --watch",
-    "serve": "npx http-server ./dist -p 8080"
+    "build": "node ./node_modules/shx/lib/cli.js mkdir -p ./dist && node ./node_modules/tailwindcss/lib/cli.js -i ./src/styles/main.css -o ./styles.css --minify && node ./node_modules/shx/lib/cli.js cp ./styles.css ./dist/ && node ./node_modules/shx/lib/cli.js cp J1U_CMF_Dashboard.html ./dist/ && node ./node_modules/shx/lib/cli.js cp J1U_CMF_Editor.html ./dist/",
+    "dev": "npm run build:css -- --watch",
+    "serve": "python3 -m http.server 3000 -d ./dist",
+    "start": "npm run serve",
+    "build:css": "node ./node_modules/shx/lib/cli.js mkdir -p ./dist && node ./node_modules/tailwindcss/lib/cli.js -i ./src/styles/main.css -o ./styles.css && node ./node_modules/shx/lib/cli.js cp ./styles.css ./dist/"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.1"
+    "caniuse-lite": "^1.0.30001700",
+    "shx": "^0.3.4",
+    "tailwindcss": "^3.4.17"
   }
 }

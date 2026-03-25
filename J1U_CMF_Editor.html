@@ -4,256 +4,131 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>J1U · CMF Data Editor</title>
-<link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    darkMode: 'class',
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ['"Encode Sans"', 'sans-serif'],
-        },
-        colors: {
-          bg: 'var(--bg)',
-          surface: 'var(--surface)',
-          surface2: 'var(--surface2)',
-          border: 'var(--border)',
-          text: 'var(--text)',
-          muted: 'var(--muted)',
-          hdr: 'var(--hdr)',
-          'hdr-text': 'var(--hdr-text)',
-          'hdr-muted': 'var(--hdr-muted)',
-          'badge-bg': 'var(--badge-bg)',
-          'badge-brd': 'var(--badge-brd)',
-          'btn-bg': 'var(--btn-bg)',
-          'btn-hov': 'var(--btn-hov)',
-          'btn-brd': 'var(--btn-brd)',
-          'tl-border': 'var(--tl-border)',
-          accent: 'var(--accent)',
-          ok: 'var(--ok)',
-          warn: 'var(--warn)',
-          risk: 'var(--risk)',
-          pending: 'var(--pending)',
-          fabric: 'var(--fabric)',
-          paint: 'var(--paint)',
-          texture: 'var(--texture)',
-          milestone: 'var(--milestone)',
-        }
-      }
-    }
-  }
-</script>
-<style>
-/* ── DARK (default) ── */
-:root {
-  --bg:        #00133b;
-  --surface:   #243882;
-  --surface2:  #162354;
-  --border:    rgba(188,188,188,0.15);
-  --text:      #ffffff;
-  --muted:     #bcbcbc;
-  --hdr:       #00133b;
-  --hdr-text:  #ffffff;
-  --hdr-muted: rgba(188,188,188,0.8);
-  --badge-bg:  #243882;
-  --badge-brd: rgba(188,188,188,0.35);
-  --sop-bg:    rgba(36,56,130,0.55);
-  --btn-bg:    #243882;
-  --btn-hov:   #2d469f;
-  --btn-brd:   rgba(188,188,188,0.3);
-  --accent:    #5b9fff;
-  --ok:        #34d399;
-  --warn:      #fbbf24;
-  --risk:      #f87171;
-  --pending:   #a78bfa;
-  --fabric:    #38bdf8;
-  --paint:     #fb923c;
-  --texture:   #c084fc;
-  --milestone: #fbbf24;
-}
-
-/* ── LIGHT ── */
-html.light {
-  --bg:        #f0f3fb;
-  --surface:   #ffffff;
-  --surface2:  #dce3f5;
-  --border:    rgba(36,56,130,0.14);
-  --text:      #00133b;
-  --muted:     #282b34;
-  --hdr:       #243882;
-  --hdr-text:  #ffffff;
-  --hdr-muted: rgba(255,255,255,0.7);
-  --badge-bg:  #00133b;
-  --badge-brd: rgba(255,255,255,0.35);
-  --sop-bg:    rgba(0,19,59,0.07);
-  --btn-bg:    #00133b;
-  --btn-hov:   #243882;
-  --btn-brd:   rgba(255,255,255,0.35);
-  --accent:    #243882;
-  --ok:        #059669;
-  --warn:      #b45309;
-  --risk:      #dc2626;
-  --pending:   #6d28d9;
-  --fabric:    #0369a1;
-  --paint:     #c2410c;
-  --texture:   #6d28d9;
-  --milestone: #92400e;
-}
-
-
-/* FORM ELEMENTS */
-.form-input, .form-select, .form-textarea {
-  background:var(--surface2); border:1px solid var(--border); color:var(--text);
-  padding:8px 12px; border-radius:7px; font-size:13px; font-family:'DM Sans',sans-serif;
-  outline:none; transition:border-color 0.2s; width:100%;
-}
-.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--accent); }
-.form-textarea { resize:vertical; min-height:72px; line-height:1.5; }
-.form-select option { background:var(--surface2); }
-
-/* TABLE */
-.data-table { width:100%; border-collapse:collapse; font-size:12px; }
-.data-table th { font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; }
-.data-table td { padding:10px 12px; border-bottom:1px solid rgba(42,47,66,0.5); vertical-align:middle; }
-.data-table tr:last-child td { border-bottom:none; }
-.data-table tr:hover td { background:var(--surface2); }
-.data-table tr.editing td { background:rgba(79,142,247,0.05); }
-
-.inline-edit { background:transparent; border:none; border-bottom:1px solid var(--border); color:var(--text); font-family:'DM Sans',sans-serif; font-size:12px; width:100%; outline:none; padding:2px 4px; }
-.inline-edit:focus { border-bottom-color:var(--accent); }
-
-/* MISC */
-.page { display:none; }
-.page.active { display:block; }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
 </head>
-<body class="font-sans bg-bg text-text min-h-screen">
+<body class="editor-page">
 
 <!-- TOAST -->
-<div class="fixed bottom-6 right-6 bg-ok text-black py-3 px-5 rounded-[10px] text-[13px] font-semibold z-[9999] translate-y-[80px] transition-transform duration-300" id="toast"></div>
+<div class="toast" id="toast"></div>
 
 <!-- MODAL -->
-<div class="fixed inset-0 bg-black/70 z-[200] hidden items-center justify-center" id="modal-overlay">
-  <div class="bg-surface border border-border rounded-[14px] p-7 w-[560px] max-w-[90vw] max-h-[90vh] overflow-y-auto" id="modal-box">
-    <div class="text-base font-semibold mb-1" id="modal-title">Add Activity</div>
-    <div class="text-xs text-muted mb-5" id="modal-sub">Fill in the activity details</div>
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-box">
+    <div class="modal-title" id="modal-title">Add Activity</div>
+    <div class="modal-sub" id="modal-sub">Fill in the activity details</div>
     <div id="modal-body"></div>
-    <div class="flex gap-2 justify-end mt-5">
-      <button class="py-2 px-4 rounded-lg text-xs font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border" onclick="closeModal()">Cancel</button>
-      <button class="py-2 px-4 rounded-lg text-xs font-semibold cursor-pointer font-sans transition-all duration-150 bg-accent text-white hover:bg-[#3a7de0] border-none" id="modal-save-btn">Save</button>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn">Save</button>
     </div>
   </div>
 </div>
 
-<header class="bg-hdr border-b border-tl-border py-4 px-9 flex items-center justify-between sticky top-0 z-[100]">
-  <div class="flex items-center gap-3.5">
-    <div class="bg-badge-bg border border-badge-brd text-white text-xs py-1 px-3 rounded text-center tracking-widest uppercase" id="h-code">J1U</div>
-    <div>
-      <div class="text-base text-hdr-text font-semibold tracking-wide">CMF Data Editor</div>
-      <div class="text-[11px] text-hdr-muted mt-0.5 tracking-wider">Edit data → open dashboard to see updates</div>
+<header>
+  <div style="display:flex;align-items:center;gap:0">
+    <div class="badge">J1U</div>
+    <div style="margin-left:12px">
+      <div class="header-title">CMF Data Editor</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:1px">Edit data → open dashboard to see updates</div>
     </div>
   </div>
-  <div class="flex items-center gap-2">
-    <button id="theme-btn" onclick="toggleTheme()" class="flex items-center gap-2 py-1.5 px-3 rounded-md cursor-pointer bg-btn-bg border border-btn-brd text-white font-sans text-[11px] font-normal tracking-wide whitespace-nowrap hover:bg-btn-hov">
-      <span class="text-[13px] leading-none" id="t-icon">☀️</span>
-      <span id="t-label">Light Mode</span>
-    </button>
-    <button class="flex items-center gap-1.5 py-1.5 px-3 rounded-md cursor-pointer bg-btn-bg border border-btn-brd text-white font-sans text-[11px] font-normal tracking-wide whitespace-nowrap hover:bg-btn-hov" onclick="exportJSON()">⬇ Export JSON</button>
-    <button class="flex items-center gap-1.5 py-1.5 px-3 rounded-md cursor-pointer bg-btn-bg border border-btn-brd text-white font-sans text-[11px] font-normal tracking-wide whitespace-nowrap hover:bg-btn-hov" onclick="document.getElementById('import-file').click()">⬆ Import JSON</button>
-    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
-    <button class="flex items-center gap-1.5 py-1.5 px-3 rounded-md cursor-pointer bg-ok/15 text-ok border border-ok/30 text-[11px] font-normal tracking-wide hover:bg-ok/25" onclick="saveAll()">💾 Save All</button>
-    <a href="J1U_CMF_Dashboard.html" target="_blank" class="flex items-center py-1.5 px-3 rounded-md cursor-pointer bg-accent text-white hover:bg-[#3a7de0] text-[11px] font-normal tracking-wide no-underline">→ Open Dashboard</a>
+  <div class="hbtns">
+    <button class="btn btn-secondary" onclick="exportJSON()">⬇ Export JSON</button>
+    <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">⬆ Import JSON</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+    <button class="btn btn-ok" onclick="saveAll()">💾 Save All</button>
+    <a href="J1U_CMF_Dashboard.html" target="_blank"><button class="btn btn-primary">→ Open Dashboard</button></a>
   </div>
 </header>
 
-<div class="grid grid-cols-[220px_1fr] min-h-[calc(100vh-61px)]">
+<div class="layout">
   <!-- SIDEBAR -->
-  <nav class="bg-surface border-r border-border py-5 px-0">
-    <div class="py-1.5 px-4 text-[10px] font-semibold text-muted uppercase tracking-widest mt-4 mb-1">Program</div>
-    <div class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium transition-colors duration-150 border-l-[3px] nav-item active text-text bg-surface2 border-l-accent" onclick="showPage('overview')" id="nav-overview">
-      <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-accent"></div> Overview & KPIs
+  <nav class="sidebar">
+    <div class="sidebar-section">Program</div>
+    <div class="nav-item active" onclick="showPage('overview')" id="nav-overview">
+      <div class="nav-dot" style="background:var(--accent)"></div> Overview & KPIs
     </div>
-    <div class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text" onclick="showPage('milestones')" id="nav-milestones">
-      <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-milestone"></div> Milestones
+    <div class="nav-item" onclick="showPage('milestones')" id="nav-milestones">
+      <div class="nav-dot" style="background:var(--milestone)"></div> Milestones
     </div>
-    <div class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text" onclick="showPage('decisions')" id="nav-decisions">
-      <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-risk"></div> Decisions Needed
-    </div>
-
-    <div class="py-1.5 px-4 text-[10px] font-semibold text-muted uppercase tracking-widest mt-4 mb-1">CMF Streams</div>
-    <div class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text" onclick="showPage('fabrics')" id="nav-fabrics">
-      <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-fabric"></div> Fabrics (Tecidos)
-    </div>
-    <div class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text" onclick="showPage('paints')" id="nav-paints">
-      <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-paint"></div> Paints (Tintas)
-    </div>
-    <div class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text" onclick="showPage('textures')" id="nav-textures">
-      <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-texture"></div> Textures (Texturas)
+    <div class="nav-item" onclick="showPage('decisions')" id="nav-decisions">
+      <div class="nav-dot" style="background:var(--risk)"></div> Decisions Needed
     </div>
 
-    <div class="py-1.5 px-4 text-[10px] font-semibold text-muted uppercase tracking-widest mt-4 mb-1">Tools</div>
-    <div class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text" onclick="showPage('notes')" id="nav-notes">
-      <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-muted"></div> Manager Notes
+    <div class="sidebar-section">CMF Streams</div>
+    <div class="nav-item" onclick="showPage('fabrics')" id="nav-fabrics">
+      <div class="nav-dot" style="background:var(--fabric)"></div> Fabrics (Tecidos)
     </div>
-    <div class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text" onclick="showPage('rawjson')" id="nav-rawjson">
-      <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-muted"></div> Raw JSON
+    <div class="nav-item" onclick="showPage('paints')" id="nav-paints">
+      <div class="nav-dot" style="background:var(--paint)"></div> Paints (Tintas)
+    </div>
+    <div class="nav-item" onclick="showPage('textures')" id="nav-textures">
+      <div class="nav-dot" style="background:var(--texture)"></div> Textures (Texturas)
+    </div>
+
+    <div class="sidebar-section">Tools</div>
+    <div class="nav-item" onclick="showPage('notes')" id="nav-notes">
+      <div class="nav-dot" style="background:var(--muted)"></div> Manager Notes
+    </div>
+    <div class="nav-item" onclick="showPage('rawjson')" id="nav-rawjson">
+      <div class="nav-dot" style="background:var(--muted)"></div> Raw JSON
     </div>
   </nav>
 
-  <div class="py-7 px-8 overflow-y-auto">
+  <div class="main-area">
 
     <!-- OVERVIEW PAGE -->
     <div class="page active" id="page-overview">
-      <div class="text-[20px] font-semibold mb-1">Program Overview</div>
-      <div class="text-[12px] text-muted mb-6">Edit top-level project settings and KPI values</div>
+      <div class="page-title">Program Overview</div>
+      <div class="page-sub">Edit top-level project settings and KPI values</div>
 
-      <div class="bg-surface border border-border rounded-xl mb-4 overflow-hidden">
-        <div class="py-[14px] px-[20px] border-b border-border flex items-center justify-between"><div class="text-[14px] font-semibold">Project Settings</div></div>
-        <div class="p-5">
-          <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]">
-            <div class="flex flex-col gap-1.5">
-              <div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Project Code</div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Project Settings</div></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <div class="form-label">Project Code</div>
               <input class="form-input" id="cfg-projectCode" placeholder="J1U">
             </div>
-            <div class="flex flex-col gap-1.5">
-              <div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Project Name</div>
+            <div class="form-group">
+              <div class="form-label">Project Name</div>
               <input class="form-input" id="cfg-projectName" placeholder="CMF Microplanning">
             </div>
-            <div class="flex flex-col gap-1.5">
-              <div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">SOP Date</div>
+            <div class="form-group">
+              <div class="form-label">SOP Date</div>
               <input class="form-input" type="date" id="cfg-sopDate">
             </div>
-            <div class="flex flex-col gap-1.5">
-              <div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">SOP Label</div>
+            <div class="form-group">
+              <div class="form-label">SOP Label</div>
               <input class="form-input" id="cfg-sopLabel" placeholder="MAR 2028">
             </div>
           </div>
-          <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]">
-            <div class="flex flex-col gap-1.5">
-              <div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Timeline Start</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <div class="form-label">Timeline Start</div>
               <input class="form-input" type="date" id="cfg-timelineStart">
             </div>
-            <div class="flex flex-col gap-1.5">
-              <div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Timeline End</div>
+            <div class="form-group">
+              <div class="form-label">Timeline End</div>
               <input class="form-input" type="date" id="cfg-timelineEnd">
             </div>
-            <div class="flex flex-col gap-1.5">
-              <div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Next Gate Label</div>
+            <div class="form-group">
+              <div class="form-label">Next Gate Label</div>
               <input class="form-input" id="cfg-nextGate" placeholder="SELECTION">
             </div>
-            <div class="flex flex-col gap-1.5">
-              <div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Next Gate Detail</div>
+            <div class="form-group">
+              <div class="form-label">Next Gate Detail</div>
               <input class="form-input" id="cfg-nextGateDetail" placeholder="Fabrics · Mar 2026">
             </div>
           </div>
-          <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 border bg-ok/15 text-ok border-ok/30 hover:bg-ok/25" onclick="saveCfg()">Save Settings</button>
+          <button class="btn btn-ok btn-sm" onclick="saveCfg()">Save Settings</button>
         </div>
       </div>
 
-      <div class="bg-surface border border-border rounded-xl mb-4 overflow-hidden">
-        <div class="py-[14px] px-[20px] border-b border-border flex items-center justify-between"><div class="text-[14px] font-semibold">Stream Summary (auto-calculated from activities)</div></div>
-        <div class="p-5" id="overview-kpis">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Stream Summary (auto-calculated from activities)</div></div>
+        <div class="card-body" id="overview-kpis">
           <!-- Generated -->
         </div>
       </div>
@@ -261,71 +136,71 @@ html.light {
 
     <!-- MILESTONES PAGE -->
     <div class="page" id="page-milestones">
-      <div class="text-[20px] font-semibold mb-1">Milestone Gates</div>
-      <div class="text-[12px] text-muted mb-6">Edit phase gates and their dates for each stream. These drive the timeline in the dashboard.</div>
+      <div class="page-title">Milestone Gates</div>
+      <div class="page-sub">Edit phase gates and their dates for each stream. These drive the timeline in the dashboard.</div>
 
       <div id="milestones-content"><!-- Generated --></div>
-      <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 border-none bg-accent text-white hover:bg-[#3a7de0]" onclick="openAddMilestone()">+ Add Milestone</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddMilestone()">+ Add Milestone</button>
     </div>
 
     <!-- DECISIONS PAGE -->
     <div class="page" id="page-decisions">
-      <div class="text-[20px] font-semibold mb-1">Decisions Needed</div>
-      <div class="text-[12px] text-muted mb-6">Items requiring managerial attention, shown in the dashboard alert panel.</div>
+      <div class="page-title">Decisions Needed</div>
+      <div class="page-sub">Items requiring managerial attention, shown in the dashboard alert panel.</div>
 
       <div id="decisions-list"><!-- Generated --></div>
-      <button class="flex items-center gap-[6px] py-2 px-[14px] bg-[#4f8ef714] border border-dashed border-[#4f8ef74d] rounded-lg text-accent text-xs cursor-pointer w-full justify-center mt-2.5 transition-all duration-150 font-sans hover:bg-[#4f8ef726]" onclick="openAddDecision()">+ Add Decision Item</button>
+      <button class="add-row-btn" onclick="openAddDecision()">+ Add Decision Item</button>
     </div>
 
     <!-- FABRICS PAGE -->
     <div class="page" id="page-fabrics">
-      <div class="text-[20px] font-semibold mb-1 text-fabric">🧵 Fabrics — Tecidos</div>
-      <div class="text-[12px] text-muted mb-6">Edit all fabric activities, statuses, responsible parties and dates.</div>
+      <div class="page-title" style="color:var(--fabric)">🧵 Fabrics — Tecidos</div>
+      <div class="page-sub">Edit all fabric activities, statuses, responsible parties and dates.</div>
       <div id="stream-table-fabrics"></div>
-      <button class="flex items-center gap-[6px] py-2 px-[14px] bg-[#4f8ef714] border border-dashed border-[#4f8ef74d] rounded-lg text-accent text-xs cursor-pointer w-full justify-center mt-2.5 transition-all duration-150 font-sans hover:bg-[#4f8ef726]" onclick="openAddActivity('fabrics')">+ Add Activity</button>
+      <button class="add-row-btn" onclick="openAddActivity('fabrics')">+ Add Activity</button>
     </div>
 
     <!-- PAINTS PAGE -->
     <div class="page" id="page-paints">
-      <div class="text-[20px] font-semibold mb-1 text-paint">🎨 Paints — Tintas</div>
-      <div class="text-[12px] text-muted mb-6">Edit all paint activities, statuses, responsible parties and dates.</div>
+      <div class="page-title" style="color:var(--paint)">🎨 Paints — Tintas</div>
+      <div class="page-sub">Edit all paint activities, statuses, responsible parties and dates.</div>
       <div id="stream-table-paints"></div>
-      <button class="flex items-center gap-[6px] py-2 px-[14px] bg-[#4f8ef714] border border-dashed border-[#4f8ef74d] rounded-lg text-accent text-xs cursor-pointer w-full justify-center mt-2.5 transition-all duration-150 font-sans hover:bg-[#4f8ef726]" onclick="openAddActivity('paints')">+ Add Activity</button>
+      <button class="add-row-btn" onclick="openAddActivity('paints')">+ Add Activity</button>
     </div>
 
     <!-- TEXTURES PAGE -->
     <div class="page" id="page-textures">
-      <div class="text-[20px] font-semibold mb-1 text-texture">🔲 Textures — Texturas</div>
-      <div class="text-[12px] text-muted mb-6">Edit all texture activities, statuses, responsible parties and dates.</div>
+      <div class="page-title" style="color:var(--texture)">🔲 Textures — Texturas</div>
+      <div class="page-sub">Edit all texture activities, statuses, responsible parties and dates.</div>
       <div id="stream-table-textures"></div>
-      <button class="flex items-center gap-[6px] py-2 px-[14px] bg-[#4f8ef714] border border-dashed border-[#4f8ef74d] rounded-lg text-accent text-xs cursor-pointer w-full justify-center mt-2.5 transition-all duration-150 font-sans hover:bg-[#4f8ef726]" onclick="openAddActivity('textures')">+ Add Activity</button>
+      <button class="add-row-btn" onclick="openAddActivity('textures')">+ Add Activity</button>
     </div>
 
     <!-- NOTES PAGE -->
     <div class="page" id="page-notes">
-      <div class="text-[20px] font-semibold mb-1">Manager Notes</div>
-      <div class="text-[12px] text-muted mb-6">Freeform notes shown in the dashboard. Auto-saved.</div>
-      <div class="bg-surface border border-border rounded-xl mb-4 overflow-hidden">
-        <div class="p-5">
+      <div class="page-title">Manager Notes</div>
+      <div class="page-sub">Freeform notes shown in the dashboard. Auto-saved.</div>
+      <div class="card">
+        <div class="card-body">
           <textarea class="form-textarea" id="notes-editor" style="min-height:300px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.7" oninput="autoSaveNotes()"></textarea>
-          <div class="text-[11px] text-muted mt-2" id="notes-saved-indicator"></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px" id="notes-saved-indicator"></div>
         </div>
       </div>
     </div>
 
     <!-- RAW JSON PAGE -->
     <div class="page" id="page-rawjson">
-      <div class="text-[20px] font-semibold mb-1">Raw JSON</div>
-      <div class="text-[12px] text-muted mb-6">View or paste raw JSON data. Use with caution.</div>
-      <div class="bg-surface border border-border rounded-xl mb-4 overflow-hidden">
-        <div class="py-[14px] px-[20px] border-b border-border flex items-center justify-between">
-          <div class="text-[14px] font-semibold">Current Data Store</div>
-          <div class="flex gap-2">
-            <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border" onclick="refreshRawJSON()">↻ Refresh</button>
-            <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 border bg-ok/15 text-ok border-ok/30 hover:bg-ok/25" onclick="applyRawJSON()">Apply JSON</button>
+      <div class="page-title">Raw JSON</div>
+      <div class="page-sub">View or paste raw JSON data. Use with caution.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Current Data Store</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary btn-sm" onclick="refreshRawJSON()">↻ Refresh</button>
+            <button class="btn btn-ok btn-sm" onclick="applyRawJSON()">Apply JSON</button>
           </div>
         </div>
-        <div class="p-5">
+        <div class="card-body">
           <textarea class="form-textarea" id="raw-json-area" style="min-height:400px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.5"></textarea>
         </div>
       </div>
@@ -551,23 +426,23 @@ function renderOverview() {
   const streams = ['fabrics','paints','textures'];
   const colors = {fabrics:'#06b6d4', paints:'#f97316', textures:'#a78bfa'};
   const icons = {fabrics:'🧵', paints:'🎨', textures:'🔲'};
-  let html = '<div class="grid grid-cols-3 gap-4">';
+  let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">';
   streams.forEach(s => {
     const acts = DATA.activities[s] || [];
     const ok = acts.filter(a => a.status === 'OK').length;
     const tbc = acts.filter(a => a.status === 'TBC').length;
     const pct = acts.length ? Math.round(ok/acts.length*100) : 0;
-    html += `<div class="bg-surface border border-border rounded-[10px] p-4" style="border-top:3px solid ${colors[s]}">
-      <div class="text-[13px] font-semibold mb-3" style="color:${colors[s]}">${icons[s]} ${s.charAt(0).toUpperCase()+s.slice(1)}</div>
-      <div class="grid grid-cols-3 gap-2 mb-3">
-        <div class="text-center"><div class="text-[22px] font-bold text-ok tabular-nums tracking-tight">${ok}</div><div class="text-[10px] text-muted">Done</div></div>
-        <div class="text-center"><div class="text-[22px] font-bold text-warn tabular-nums tracking-tight">${tbc}</div><div class="text-[10px] text-muted">TBC</div></div>
-        <div class="text-center"><div class="text-[22px] font-bold text-muted tabular-nums tracking-tight">${acts.length-ok-tbc}</div><div class="text-[10px] text-muted">Pending</div></div>
+    html += `<div class="kpi-box" style="border-top:3px solid ${colors[s]}">
+      <div style="font-size:13px;font-weight:600;color:${colors[s]};margin-bottom:12px">${icons[s]} ${s.charAt(0).toUpperCase()+s.slice(1)}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:#22c55e;font-family:'DM Mono',monospace">${ok}</div><div style="font-size:10px;color:var(--muted)">Done</div></div>
+        <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:#f59e0b;font-family:'DM Mono',monospace">${tbc}</div><div style="font-size:10px;color:var(--muted)">TBC</div></div>
+        <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:var(--muted);font-family:'DM Mono',monospace">${acts.length-ok-tbc}</div><div style="font-size:10px;color:var(--muted)">Pending</div></div>
       </div>
-      <div class="bg-surface2 rounded h-1.5 overflow-hidden">
-        <div class="h-full rounded" style="width:${pct}%;background:${colors[s]}"></div>
+      <div style="background:var(--surface2);border-radius:4px;height:6px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${colors[s]};border-radius:4px"></div>
       </div>
-      <div class="text-[11px] text-muted mt-1.5">${pct}% complete · ${acts.length} total activities</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">${pct}% complete · ${acts.length} total activities</div>
     </div>`;
   });
   html += '</div>';
@@ -597,23 +472,23 @@ function renderMilestones() {
   let html = '';
   streams.forEach(s => {
     const ms = DATA.milestones.filter(m => m.stream === s);
-    html += `<div class="text-[11px] font-semibold uppercase tracking-widest py-2.5 px-0 border-b border-border mb-3.5 flex items-center justify-between" style="color:${streamColors[s]}">${s.toUpperCase()} MILESTONES <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border" onclick="openAddMilestone('${s}')">+ Add</button></div>`;
-    html += '<div class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3.5 mb-5">';
+    html += `<div class="section-divider" style="color:${streamColors[s]}">${s.toUpperCase()} MILESTONES <button class="btn btn-secondary btn-sm" onclick="openAddMilestone('${s}')">+ Add</button></div>`;
+    html += '<div class="milestone-grid" style="margin-bottom:20px">';
     ms.forEach(m => {
       const sc = { done:'var(--ok)', active:'var(--accent)', upcoming:'var(--muted)', delayed:'var(--risk)', tbc:'var(--warn)' }[m.status] || 'var(--muted)';
-      html += `<div class="bg-surface2 border border-border rounded-[10px] p-4">
-        <div class="text-[10px] font-bold uppercase tracking-[0.07em] mb-1.5" style="color:${streamColors[s]}">${s}</div>
-        <input class="form-input mb-2 font-semibold" value="${m.name}" onchange="updateMilestone('${m.id}','name',this.value)">
-        <div class="grid grid-cols-2 gap-[14px]">
-          <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Date</div>
+      html += `<div class="milestone-card">
+        <div class="m-stream" style="color:${streamColors[s]}">${s}</div>
+        <input class="form-input" style="margin-bottom:8px;font-weight:600" value="${m.name}" onchange="updateMilestone('${m.id}','name',this.value)">
+        <div class="form-grid" style="grid-template-columns:1fr 1fr">
+          <div class="form-group"><div class="form-label">Date</div>
             <input class="form-input" type="date" value="${m.date}" onchange="updateMilestone('${m.id}','date',this.value)"></div>
-          <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Status</div>
+          <div class="form-group"><div class="form-label">Status</div>
             <select class="form-select" onchange="updateMilestone('${m.id}','status',this.value)">
               ${statusOpts.map(o=>`<option value="${o}" ${m.status===o?'selected':''}>${o}</option>`).join('')}
             </select></div>
         </div>
-        <div class="mt-2.5 flex justify-end">
-          <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-risk/10 text-risk border border-risk/25 hover:bg-risk/20" onclick="deleteMilestone('${m.id}')">✕ Remove</button>
+        <div style="margin-top:10px;display:flex;justify-content:flex-end">
+          <button class="btn btn-danger btn-sm" onclick="deleteMilestone('${m.id}')">✕ Remove</button>
         </div>
       </div>`;
     });
@@ -633,16 +508,16 @@ function deleteMilestone(id) {
 }
 function openAddMilestone(stream) {
   openModal('Add Milestone', 'Add a new milestone gate', `
-    <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]">
-      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Stream</div>
+    <div class="form-grid">
+      <div class="form-group"><div class="form-label">Stream</div>
         <select class="form-select" id="nm-stream">
           <option value="fabrics" ${stream==='fabrics'?'selected':''}>Fabrics</option>
           <option value="paints" ${stream==='paints'?'selected':''}>Paints</option>
           <option value="textures" ${stream==='textures'?'selected':''}>Textures</option>
         </select></div>
-      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Name</div><input class="form-input" id="nm-name" placeholder="CMF Direction"></div>
-      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Date</div><input class="form-input" type="date" id="nm-date"></div>
-      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Status</div>
+      <div class="form-group"><div class="form-label">Name</div><input class="form-input" id="nm-name" placeholder="CMF Direction"></div>
+      <div class="form-group"><div class="form-label">Date</div><input class="form-input" type="date" id="nm-date"></div>
+      <div class="form-group"><div class="form-label">Status</div>
         <select class="form-select" id="nm-status">
           ${statusOpts.map(o=>`<option value="${o}">${o}</option>`).join('')}
         </select></div>
@@ -658,28 +533,27 @@ const priorityLabels = { urgent:'🔴 Urgent', medium:'🟡 Medium', info:'🔵 
 function renderDecisions() {
   let html = '';
   DATA.decisions.forEach(d => {
-    const borderColor = d.priority === 'urgent' ? 'var(--risk)' : d.priority === 'medium' ? 'var(--warn)' : 'var(--accent)';
-    html += `<div class="bg-surface border border-border rounded-xl mb-4 overflow-hidden" style="border-left:3px solid ${borderColor}">
-      <div class="p-4">
-        <div class="grid grid-cols-[2fr_1fr_1fr] gap-3 mb-2">
-          <div class="flex flex-col gap-1"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Title</div><input class="form-input" value="${d.title}" onchange="updateDecision('${d.id}','title',this.value)"></div>
-          <div class="flex flex-col gap-1"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Stream</div>
+    html += `<div class="card" style="border-left:3px solid ${d.priority==='urgent'?'var(--risk)':d.priority==='medium'?'var(--warn)':'var(--accent)'}">
+      <div class="card-body" style="padding:16px">
+        <div class="form-grid" style="grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:8px">
+          <div class="form-group"><div class="form-label">Title</div><input class="form-input" value="${d.title}" onchange="updateDecision('${d.id}','title',this.value)"></div>
+          <div class="form-group"><div class="form-label">Stream</div>
             <select class="form-select" onchange="updateDecision('${d.id}','stream',this.value)">
               <option value="fabrics" ${d.stream==='fabrics'?'selected':''}>Fabrics</option>
               <option value="paints" ${d.stream==='paints'?'selected':''}>Paints</option>
               <option value="textures" ${d.stream==='textures'?'selected':''}>Textures</option>
               <option value="all" ${d.stream==='all'?'selected':''}>All Streams</option>
             </select></div>
-          <div class="flex flex-col gap-1"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Priority</div>
+          <div class="form-group"><div class="form-label">Priority</div>
             <select class="form-select" onchange="updateDecision('${d.id}','priority',this.value)">
               <option value="urgent" ${d.priority==='urgent'?'selected':''}>🔴 Urgent</option>
               <option value="medium" ${d.priority==='medium'?'selected':''}>🟡 Medium</option>
               <option value="info" ${d.priority==='info'?'selected':''}>🔵 Info</option>
             </select></div>
         </div>
-        <div class="flex flex-col gap-1 mb-2"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Detail</div>
+        <div class="form-group" style="margin-bottom:8px"><div class="form-label">Detail</div>
           <textarea class="form-textarea" style="min-height:56px" onchange="updateDecision('${d.id}','detail',this.value)">${d.detail}</textarea></div>
-        <div class="flex justify-end"><button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-risk/10 text-risk border border-risk/25 hover:bg-risk/20" onclick="deleteDecision('${d.id}')">✕ Remove</button></div>
+        <div style="display:flex;justify-content:flex-end"><button class="btn btn-danger btn-sm" onclick="deleteDecision('${d.id}')">✕ Remove</button></div>
       </div>
     </div>`;
   });
@@ -697,18 +571,18 @@ function deleteDecision(id) {
 }
 function openAddDecision() {
   openModal('Add Decision Item','', `
-    <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]">
-      <div class="flex flex-col gap-[5px] col-span-full"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Title</div><input class="form-input" id="nd-title" placeholder="Decision title..."></div>
-      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Stream</div>
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1"><div class="form-label">Title</div><input class="form-input" id="nd-title" placeholder="Decision title..."></div>
+      <div class="form-group"><div class="form-label">Stream</div>
         <select class="form-select" id="nd-stream">
           <option value="fabrics">Fabrics</option><option value="paints">Paints</option><option value="textures">Textures</option><option value="all">All</option>
         </select></div>
-      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Priority</div>
+      <div class="form-group"><div class="form-label">Priority</div>
         <select class="form-select" id="nd-priority">
           <option value="urgent">🔴 Urgent</option><option value="medium">🟡 Medium</option><option value="info">🔵 Info</option>
         </select></div>
     </div>
-    <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Detail</div><textarea class="form-textarea" id="nd-detail" placeholder="Describe what decision is needed..."></textarea></div>
+    <div class="form-group"><div class="form-label">Detail</div><textarea class="form-textarea" id="nd-detail" placeholder="Describe what decision is needed..."></textarea></div>
   `, () => {
     DATA.decisions.push({ id:'d'+Date.now(), title:document.getElementById('nd-title').value, stream:document.getElementById('nd-stream').value, priority:document.getElementById('nd-priority').value, detail:document.getElementById('nd-detail').value });
     saveData(); renderDecisions(); closeModal(); toast('Decision item added!');
@@ -721,25 +595,25 @@ const statusClass = { OK:'s-ok', TBC:'s-tbc', Pending:'s-pending', Risk:'s-risk'
 
 function renderStreamTable(stream) {
   const acts = DATA.activities[stream] || [];
-  let html = `<div class="bg-surface border border-border rounded-xl mb-4 overflow-hidden"><div class="py-[14px] px-[20px] border-b border-border flex items-center justify-between"><div class="text-[14px] font-semibold">${acts.length} Activities</div>
-    <div class="text-[11px] text-muted">Click any cell to edit inline · changes auto-save</div></div>
-  <div class="overflow-x-auto"><table class="data-table"><thead><tr>
-    <th class="w-12">#</th><th>Activity Name</th><th>Responsible</th><th class="w-[110px]">Date</th><th class="w-[90px]">Status</th><th>Observations</th><th class="w-[70px]">Actions</th>
+  let html = `<div class="card"><div class="card-header"><div class="card-title">${acts.length} Activities</div>
+    <div style="font-size:11px;color:var(--muted)">Click any cell to edit inline · changes auto-save</div></div>
+  <div style="overflow-x:auto"><table class="data-table"><thead><tr>
+    <th style="width:48px">#</th><th>Activity Name</th><th>Responsible</th><th style="width:110px">Date</th><th style="width:90px">Status</th><th>Observations</th><th style="width:70px">Actions</th>
   </tr></thead><tbody id="tbody-${stream}">`;
 
   acts.forEach(a => {
     html += `<tr id="row-${a.id}">
       <td><span class="inline-edit" contenteditable="true" onblur="updateActivity('${stream}','${a.id}','num',this.textContent.trim())">${a.num}</span></td>
-      <td><span class="inline-edit min-w-[200px] block" contenteditable="true" onblur="updateActivity('${stream}','${a.id}','name',this.textContent.trim())">${a.name}</span></td>
+      <td><span class="inline-edit" contenteditable="true" style="min-width:200px;display:block" onblur="updateActivity('${stream}','${a.id}','name',this.textContent.trim())">${a.name}</span></td>
       <td><span class="inline-edit" contenteditable="true" onblur="updateActivity('${stream}','${a.id}','responsible',this.textContent.trim())">${a.responsible}</span></td>
-      <td><input class="inline-edit w-[108px]" type="date" value="${a.date||''}" onchange="updateActivity('${stream}','${a.id}','date',this.value)"></td>
+      <td><input class="inline-edit" type="date" value="${a.date||''}" onchange="updateActivity('${stream}','${a.id}','date',this.value)" style="width:108px"></td>
       <td>
-        <select class="form-select py-1 px-2 text-[11px]" onchange="updateActivity('${stream}','${a.id}','status',this.value)">
+        <select class="form-select" style="padding:4px 8px;font-size:11px" onchange="updateActivity('${stream}','${a.id}','status',this.value)">
           ${statusOptions.map(o=>`<option value="${o}" ${a.status===o?'selected':''}>${o}</option>`).join('')}
         </select>
       </td>
-      <td><span class="inline-edit min-w-[120px] block text-muted text-[11px]" contenteditable="true" onblur="updateActivity('${stream}','${a.id}','obs',this.textContent.trim())">${a.obs||''}</span></td>
-      <td><button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-risk/10 text-risk border border-risk/25 hover:bg-risk/20" onclick="deleteActivity('${stream}','${a.id}')">✕</button></td>
+      <td><span class="inline-edit" contenteditable="true" style="min-width:120px;display:block;color:var(--muted);font-size:11px" onblur="updateActivity('${stream}','${a.id}','obs',this.textContent.trim())">${a.obs||''}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteActivity('${stream}','${a.id}')">✕</button></td>
     </tr>`;
   });
   html += '</tbody></table></div></div>';
@@ -757,19 +631,19 @@ function deleteActivity(stream, id) {
 }
 function openAddActivity(stream) {
   openModal('Add Activity', `Add to ${stream}`, `
-    <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]">
-      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Number / ID</div><input class="form-input" id="na-num" placeholder="e.g. 5.2"></div>
-      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Status</div>
+    <div class="form-grid">
+      <div class="form-group"><div class="form-label">Number / ID</div><input class="form-input" id="na-num" placeholder="e.g. 5.2"></div>
+      <div class="form-group"><div class="form-label">Status</div>
         <select class="form-select" id="na-status">
           ${statusOptions.map(o=>`<option value="${o}">${o}</option>`).join('')}
         </select></div>
     </div>
-    <div class="flex flex-col gap-[5px] mb-3"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Activity Name</div><input class="form-input" id="na-name" placeholder="Activity description..."></div>
-    <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]">
-      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Responsible</div><input class="form-input" id="na-resp" placeholder="Design / Compras"></div>
-      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Date</div><input class="form-input" type="date" id="na-date"></div>
+    <div class="form-group" style="margin-bottom:12px"><div class="form-label">Activity Name</div><input class="form-input" id="na-name" placeholder="Activity description..."></div>
+    <div class="form-grid">
+      <div class="form-group"><div class="form-label">Responsible</div><input class="form-input" id="na-resp" placeholder="Design / Compras"></div>
+      <div class="form-group"><div class="form-label">Date</div><input class="form-input" type="date" id="na-date"></div>
     </div>
-    <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Observations</div><textarea class="form-textarea" id="na-obs" style="min-height:56px"></textarea></div>
+    <div class="form-group"><div class="form-label">Observations</div><textarea class="form-textarea" id="na-obs" style="min-height:56px"></textarea></div>
   `, () => {
     if (!DATA.activities[stream]) DATA.activities[stream] = [];
     DATA.activities[stream].push({ id:'a'+Date.now(), num:document.getElementById('na-num').value, name:document.getElementById('na-name').value, responsible:document.getElementById('na-resp').value, status:document.getElementById('na-status').value, date:document.getElementById('na-date').value, obs:document.getElementById('na-obs').value });
@@ -809,11 +683,11 @@ function openModal(title, sub, bodyHTML, saveFn) {
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-sub').textContent = sub;
   document.getElementById('modal-body').innerHTML = bodyHTML;
-  document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
+  document.getElementById('modal-overlay').classList.add('open');
   _modalSaveFn = saveFn;
   document.getElementById('modal-save-btn').onclick = saveFn;
 }
-function closeModal() { document.getElementById('modal-overlay').classList.replace('flex', 'hidden'); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 document.getElementById('modal-overlay').addEventListener('click', e => { if(e.target === document.getElementById('modal-overlay')) closeModal(); });
 
 // ─── IMPORT / EXPORT ─────────────────────────────────────────────────────────
@@ -851,39 +725,9 @@ function saveAll() {
 function toast(msg, isError) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  // Apply visual error state if needed
-  if (isError) {
-    t.classList.replace('bg-ok', 'bg-risk');
-    t.classList.replace('text-black', 'text-white');
-  } else {
-    t.classList.replace('bg-risk', 'bg-ok');
-    t.classList.replace('text-white', 'text-black');
-  }
-  
-  // Slide up toast
-  t.classList.remove('translate-y-[80px]');
-  
-  // Slide down (hide) after 3s
-  setTimeout(() => {
-    t.classList.add('translate-y-[80px]');
-  }, 3000);
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
-
-// ─── THEME TOGGLE ──────────────────────────────────────────────────────────────
-function applyTheme(light){
-  document.documentElement.classList.toggle('light',light);
-  document.getElementById('t-icon').textContent  = light ? '🌙' : '☀️';
-  document.getElementById('t-label').textContent = light ? 'Dark Mode' : 'Light Mode';
-}
-function toggleTheme(){
-  const goLight=!document.documentElement.classList.contains('light');
-  applyTheme(goLight);
-  try{localStorage.setItem('j1u_theme',goLight?'light':'dark');}catch(e){}
-}
-// Init theme from saved preference
-(function(){
-  try{const saved=localStorage.getItem('j1u_theme');if(saved==='light')applyTheme(true);}catch(e){}
-})();
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 loadData();

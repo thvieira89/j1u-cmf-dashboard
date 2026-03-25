@@ -1,7 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
-  content: ["./dist/*.html", "./src/js/*.js"],
+  content: [
+    './*.html',
+    './src/**/*.{html,js,css}',
+  ],
   theme: {
     extend: {
       colors: {
@@ -20,6 +23,12 @@ module.exports = {
         'btn-bg': 'var(--btn-bg)',
         'btn-hov': 'var(--btn-hov)',
         'btn-brd': 'var(--btn-brd)',
+        'tl-track': 'var(--tl-track)',
+        'tl-border': 'var(--tl-border)',
+        'now-line': 'var(--now-line)',
+        'tip-bg': 'var(--tip-bg)',
+        'tip-brd': 'var(--tip-brd)',
+        'tip-text': 'var(--tip-text)',
         accent: 'var(--accent)',
         ok: 'var(--ok)',
         warn: 'var(--warn)',
@@ -28,6 +37,10 @@ module.exports = {
         fabric: 'var(--fabric)',
         paint: 'var(--paint)',
         texture: 'var(--texture)',
+        milestone: 'var(--milestone)',
+      },
+      fontFamily: {
+        sans: ['"Encode Sans"', 'sans-serif'],
       },
     },
   },
