@@ -1,365 +1,1526 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>J1U · CMF Data Editor</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css">
-</head>
-<body class="editor-page">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>J1U · CMF Data Editor</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="editor-modern-page font-sans bg-bg text-text min-h-screen">
+    <!-- TOAST -->
+    <div
+      class="fixed bottom-6 right-6 bg-ok text-black py-3 px-5 rounded-[10px] text-[13px] font-semibold z-[9999] translate-y-[80px] transition-transform duration-300"
+      id="toast"
+    ></div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal" id="modal-box">
-    <div class="modal-title" id="modal-title">Add Activity</div>
-    <div class="modal-sub" id="modal-sub">Fill in the activity details</div>
-    <div id="modal-body"></div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" id="modal-save-btn">Save</button>
-    </div>
-  </div>
-</div>
-
-<header>
-  <div style="display:flex;align-items:center;gap:0">
-    <div class="badge">J1U</div>
-    <div style="margin-left:12px">
-      <div class="header-title">CMF Data Editor</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:1px">Edit data → open dashboard to see updates</div>
-    </div>
-  </div>
-  <div class="hbtns">
-    <button class="btn btn-secondary" onclick="exportJSON()">⬇ Export JSON</button>
-    <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">⬆ Import JSON</button>
-    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
-    <button class="btn btn-ok" onclick="saveAll()">💾 Save All</button>
-    <a href="J1U_CMF_Dashboard.html" target="_blank"><button class="btn btn-primary">→ Open Dashboard</button></a>
-  </div>
-</header>
-
-<div class="layout">
-  <!-- SIDEBAR -->
-  <nav class="sidebar">
-    <div class="sidebar-section">Program</div>
-    <div class="nav-item active" onclick="showPage('overview')" id="nav-overview">
-      <div class="nav-dot" style="background:var(--accent)"></div> Overview & KPIs
-    </div>
-    <div class="nav-item" onclick="showPage('milestones')" id="nav-milestones">
-      <div class="nav-dot" style="background:var(--milestone)"></div> Milestones
-    </div>
-    <div class="nav-item" onclick="showPage('decisions')" id="nav-decisions">
-      <div class="nav-dot" style="background:var(--risk)"></div> Decisions Needed
+    <!-- MODAL -->
+    <div
+      class="fixed inset-0 bg-black/70 z-[200] hidden items-center justify-center"
+      id="modal-overlay"
+    >
+      <div
+        class="bg-surface border border-border rounded-[14px] p-7 w-[560px] max-w-[90vw] max-h-[90vh] overflow-y-auto"
+        id="modal-box"
+      >
+        <div class="text-base font-semibold mb-1" id="modal-title">
+          Add Activity
+        </div>
+        <div class="text-xs text-muted mb-5" id="modal-sub">
+          Fill in the activity details
+        </div>
+        <div id="modal-body"></div>
+        <div class="flex gap-2 justify-end mt-5">
+          <button
+            class="py-2 px-4 rounded-lg text-xs font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border"
+            onclick="closeModal()"
+          >
+            Cancel
+          </button>
+          <button
+            class="py-2 px-4 rounded-lg text-xs font-semibold cursor-pointer font-sans transition-all duration-150 bg-accent text-white hover:bg-[#3a7de0] border-none"
+            id="modal-save-btn"
+          >
+            Save
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="sidebar-section">CMF Streams</div>
-    <div class="nav-item" onclick="showPage('fabrics')" id="nav-fabrics">
-      <div class="nav-dot" style="background:var(--fabric)"></div> Fabrics (Tecidos)
-    </div>
-    <div class="nav-item" onclick="showPage('paints')" id="nav-paints">
-      <div class="nav-dot" style="background:var(--paint)"></div> Paints (Tintas)
-    </div>
-    <div class="nav-item" onclick="showPage('textures')" id="nav-textures">
-      <div class="nav-dot" style="background:var(--texture)"></div> Textures (Texturas)
-    </div>
-
-    <div class="sidebar-section">Tools</div>
-    <div class="nav-item" onclick="showPage('notes')" id="nav-notes">
-      <div class="nav-dot" style="background:var(--muted)"></div> Manager Notes
-    </div>
-    <div class="nav-item" onclick="showPage('rawjson')" id="nav-rawjson">
-      <div class="nav-dot" style="background:var(--muted)"></div> Raw JSON
-    </div>
-  </nav>
-
-  <div class="main-area">
-
-    <!-- OVERVIEW PAGE -->
-    <div class="page active" id="page-overview">
-      <div class="page-title">Program Overview</div>
-      <div class="page-sub">Edit top-level project settings and KPI values</div>
-
-      <div class="card">
-        <div class="card-header"><div class="card-title">Project Settings</div></div>
-        <div class="card-body">
-          <div class="form-grid">
-            <div class="form-group">
-              <div class="form-label">Project Code</div>
-              <input class="form-input" id="cfg-projectCode" placeholder="J1U">
-            </div>
-            <div class="form-group">
-              <div class="form-label">Project Name</div>
-              <input class="form-input" id="cfg-projectName" placeholder="CMF Microplanning">
-            </div>
-            <div class="form-group">
-              <div class="form-label">SOP Date</div>
-              <input class="form-input" type="date" id="cfg-sopDate">
-            </div>
-            <div class="form-group">
-              <div class="form-label">SOP Label</div>
-              <input class="form-input" id="cfg-sopLabel" placeholder="MAR 2028">
-            </div>
+    <header
+      class="editor-modern-header bg-hdr border-b border-tl-border py-4 px-9 flex items-center justify-between sticky top-0 z-[100]"
+    >
+      <div class="flex items-center gap-3.5">
+        <div
+          class="bg-badge-bg border border-badge-brd text-white text-xs py-1 px-3 rounded text-center tracking-widest uppercase"
+          id="h-code"
+        >
+          J1U
+        </div>
+        <div>
+          <div class="text-base text-hdr-text font-semibold tracking-wide">
+            CMF Data Editor
           </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <div class="form-label">Timeline Start</div>
-              <input class="form-input" type="date" id="cfg-timelineStart">
-            </div>
-            <div class="form-group">
-              <div class="form-label">Timeline End</div>
-              <input class="form-input" type="date" id="cfg-timelineEnd">
-            </div>
-            <div class="form-group">
-              <div class="form-label">Next Gate Label</div>
-              <input class="form-input" id="cfg-nextGate" placeholder="SELECTION">
-            </div>
-            <div class="form-group">
-              <div class="form-label">Next Gate Detail</div>
-              <input class="form-input" id="cfg-nextGateDetail" placeholder="Fabrics · Mar 2026">
-            </div>
-          </div>
-          <button class="btn btn-ok btn-sm" onclick="saveCfg()">Save Settings</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><div class="card-title">Stream Summary (auto-calculated from activities)</div></div>
-        <div class="card-body" id="overview-kpis">
-          <!-- Generated -->
-        </div>
-      </div>
-    </div>
-
-    <!-- MILESTONES PAGE -->
-    <div class="page" id="page-milestones">
-      <div class="page-title">Milestone Gates</div>
-      <div class="page-sub">Edit phase gates and their dates for each stream. These drive the timeline in the dashboard.</div>
-
-      <div id="milestones-content"><!-- Generated --></div>
-      <button class="btn btn-primary btn-sm" onclick="openAddMilestone()">+ Add Milestone</button>
-    </div>
-
-    <!-- DECISIONS PAGE -->
-    <div class="page" id="page-decisions">
-      <div class="page-title">Decisions Needed</div>
-      <div class="page-sub">Items requiring managerial attention, shown in the dashboard alert panel.</div>
-
-      <div id="decisions-list"><!-- Generated --></div>
-      <button class="add-row-btn" onclick="openAddDecision()">+ Add Decision Item</button>
-    </div>
-
-    <!-- FABRICS PAGE -->
-    <div class="page" id="page-fabrics">
-      <div class="page-title" style="color:var(--fabric)">🧵 Fabrics — Tecidos</div>
-      <div class="page-sub">Edit all fabric activities, statuses, responsible parties and dates.</div>
-      <div id="stream-table-fabrics"></div>
-      <button class="add-row-btn" onclick="openAddActivity('fabrics')">+ Add Activity</button>
-    </div>
-
-    <!-- PAINTS PAGE -->
-    <div class="page" id="page-paints">
-      <div class="page-title" style="color:var(--paint)">🎨 Paints — Tintas</div>
-      <div class="page-sub">Edit all paint activities, statuses, responsible parties and dates.</div>
-      <div id="stream-table-paints"></div>
-      <button class="add-row-btn" onclick="openAddActivity('paints')">+ Add Activity</button>
-    </div>
-
-    <!-- TEXTURES PAGE -->
-    <div class="page" id="page-textures">
-      <div class="page-title" style="color:var(--texture)">🔲 Textures — Texturas</div>
-      <div class="page-sub">Edit all texture activities, statuses, responsible parties and dates.</div>
-      <div id="stream-table-textures"></div>
-      <button class="add-row-btn" onclick="openAddActivity('textures')">+ Add Activity</button>
-    </div>
-
-    <!-- NOTES PAGE -->
-    <div class="page" id="page-notes">
-      <div class="page-title">Manager Notes</div>
-      <div class="page-sub">Freeform notes shown in the dashboard. Auto-saved.</div>
-      <div class="card">
-        <div class="card-body">
-          <textarea class="form-textarea" id="notes-editor" style="min-height:300px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.7" oninput="autoSaveNotes()"></textarea>
-          <div style="font-size:11px;color:var(--muted);margin-top:8px" id="notes-saved-indicator"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RAW JSON PAGE -->
-    <div class="page" id="page-rawjson">
-      <div class="page-title">Raw JSON</div>
-      <div class="page-sub">View or paste raw JSON data. Use with caution.</div>
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Current Data Store</div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-secondary btn-sm" onclick="refreshRawJSON()">↻ Refresh</button>
-            <button class="btn btn-ok btn-sm" onclick="applyRawJSON()">Apply JSON</button>
+          <div class="text-[11px] text-hdr-muted mt-0.5 tracking-wider">
+            Edit data → open dashboard to see updates
           </div>
         </div>
-        <div class="card-body">
-          <textarea class="form-textarea" id="raw-json-area" style="min-height:400px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.5"></textarea>
+      </div>
+      <div class="editor-modern-actions flex items-center gap-2">
+        <button
+          id="theme-btn"
+          onclick="toggleTheme()"
+          class="flex items-center gap-2 py-1.5 px-3 rounded-md cursor-pointer bg-btn-bg border border-btn-brd text-white font-sans text-[11px] font-normal tracking-wide whitespace-nowrap hover:bg-btn-hov"
+        >
+          <span class="text-[13px] leading-none" id="t-icon">☀️</span>
+          <span id="t-label">Light Mode</span>
+        </button>
+        <button
+          class="flex items-center gap-1.5 py-1.5 px-3 rounded-md cursor-pointer bg-btn-bg border border-btn-brd text-white font-sans text-[11px] font-normal tracking-wide whitespace-nowrap hover:bg-btn-hov"
+          onclick="exportJSON()"
+        >
+          ⬇ Export JSON
+        </button>
+        <button
+          class="flex items-center gap-1.5 py-1.5 px-3 rounded-md cursor-pointer bg-btn-bg border border-btn-brd text-white font-sans text-[11px] font-normal tracking-wide whitespace-nowrap hover:bg-btn-hov"
+          onclick="document.getElementById('import-file').click()"
+        >
+          ⬆ Import JSON
+        </button>
+        <input
+          type="file"
+          id="import-file"
+          accept=".json"
+          class="hidden"
+          onchange="importJSON(event)"
+        />
+        <button
+          class="flex items-center gap-1.5 py-1.5 px-3 rounded-md cursor-pointer bg-ok/15 text-ok border border-ok/30 text-[11px] font-normal tracking-wide hover:bg-ok/25"
+          onclick="saveAll()"
+        >
+          💾 Save All
+        </button>
+        <a
+          href="J1U_CMF_Dashboard.html"
+          target="_blank"
+          class="flex items-center py-1.5 px-3 rounded-md cursor-pointer bg-accent text-white hover:bg-[#3a7de0] text-[11px] font-normal tracking-wide no-underline"
+          >→ Open Dashboard</a
+        >
+      </div>
+    </header>
+
+    <div class="editor-modern-shell grid grid-cols-[220px_1fr] min-h-[calc(100vh-61px)]">
+      <!-- SIDEBAR -->
+      <nav class="editor-modern-sidebar bg-surface border-r border-border py-5 px-0">
+        <div
+          class="py-1.5 px-4 text-[10px] font-semibold text-muted uppercase tracking-widest mt-4 mb-1"
+        >
+          Program
+        </div>
+        <div
+          class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium transition-colors duration-150 border-l-[3px] nav-item active text-text bg-surface2 border-l-accent"
+          onclick="showPage('overview')"
+          id="nav-overview"
+        >
+          <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-accent"></div>
+          Overview & KPIs
+        </div>
+        <div
+          class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text"
+          onclick="showPage('milestones')"
+          id="nav-milestones"
+        >
+          <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-milestone"></div>
+          Milestones
+        </div>
+        <div
+          class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text"
+          onclick="showPage('decisions')"
+          id="nav-decisions"
+        >
+          <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-risk"></div>
+          Decisions Needed
+        </div>
+
+        <div
+          class="py-1.5 px-4 text-[10px] font-semibold text-muted uppercase tracking-widest mt-4 mb-1"
+        >
+          CMF Streams
+        </div>
+        <div
+          class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text"
+          onclick="showPage('fabrics')"
+          id="nav-fabrics"
+        >
+          <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-fabric"></div>
+          Fabrics (Tecidos)
+        </div>
+        <div
+          class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text"
+          onclick="showPage('paints')"
+          id="nav-paints"
+        >
+          <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-paint"></div>
+          Paints (Tintas)
+        </div>
+        <div
+          class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text"
+          onclick="showPage('textures')"
+          id="nav-textures"
+        >
+          <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-texture"></div>
+          Textures (Texturas)
+        </div>
+
+        <div
+          class="py-1.5 px-4 text-[10px] font-semibold text-muted uppercase tracking-widest mt-4 mb-1"
+        >
+          Tools
+        </div>
+        <div
+          class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text"
+          onclick="showPage('notes')"
+          id="nav-notes"
+        >
+          <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-muted"></div>
+          Manager Notes
+        </div>
+        <div
+          class="flex items-center gap-2.5 py-2 px-5 cursor-pointer text-[13px] font-medium text-muted transition-colors duration-150 border-l-[3px] border-l-transparent nav-item hover:bg-surface2 hover:text-text"
+          onclick="showPage('rawjson')"
+          id="nav-rawjson"
+        >
+          <div class="w-2.5 h-2.5 rounded-full shrink-0 bg-muted"></div>
+          Raw JSON
+        </div>
+      </nav>
+
+      <div class="editor-modern-main py-7 px-8 overflow-y-auto">
+        <!-- OVERVIEW PAGE -->
+        <div class="page active" id="page-overview">
+          <div class="text-[20px] font-semibold mb-1">Program Overview</div>
+          <div class="text-[12px] text-muted mb-6">
+            Edit top-level project settings and KPI values
+          </div>
+
+          <div
+            class="bg-surface border border-border rounded-xl mb-4 overflow-hidden"
+          >
+            <div
+              class="py-[14px] px-[20px] border-b border-border flex items-center justify-between"
+            >
+              <div class="text-[14px] font-semibold">Project Settings</div>
+            </div>
+            <div class="p-5">
+              <div
+                class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]"
+              >
+                <div class="flex flex-col gap-1.5">
+                  <div
+                    class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]"
+                  >
+                    Project Code
+                  </div>
+                  <input
+                    class="form-input"
+                    id="cfg-projectCode"
+                    placeholder="J1U"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <div
+                    class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]"
+                  >
+                    Project Name
+                  </div>
+                  <input
+                    class="form-input"
+                    id="cfg-projectName"
+                    placeholder="CMF Microplanning"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <div
+                    class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]"
+                  >
+                    SOP Date
+                  </div>
+                  <input class="form-input" type="date" id="cfg-sopDate" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <div
+                    class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]"
+                  >
+                    SOP Label
+                  </div>
+                  <input
+                    class="form-input"
+                    id="cfg-sopLabel"
+                    placeholder="MAR 2028"
+                  />
+                </div>
+              </div>
+              <div
+                class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]"
+              >
+                <div class="flex flex-col gap-1.5">
+                  <div
+                    class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]"
+                  >
+                    Timeline Start
+                  </div>
+                  <input
+                    class="form-input"
+                    type="date"
+                    id="cfg-timelineStart"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <div
+                    class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]"
+                  >
+                    Timeline End
+                  </div>
+                  <input class="form-input" type="date" id="cfg-timelineEnd" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <div
+                    class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]"
+                  >
+                    Next Gate Label
+                  </div>
+                  <input
+                    class="form-input"
+                    id="cfg-nextGate"
+                    placeholder="SELECTION"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <div
+                    class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]"
+                  >
+                    Next Gate Detail
+                  </div>
+                  <input
+                    class="form-input"
+                    id="cfg-nextGateDetail"
+                    placeholder="Fabrics · Mar 2026"
+                  />
+                </div>
+              </div>
+              <button
+                class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 border bg-ok/15 text-ok border-ok/30 hover:bg-ok/25"
+                onclick="saveCfg()"
+              >
+                Save Settings
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="bg-surface border border-border rounded-xl mb-4 overflow-hidden"
+          >
+            <div
+              class="py-[14px] px-[20px] border-b border-border flex items-center justify-between"
+            >
+              <div class="text-[14px] font-semibold">
+                Stream Summary (auto-calculated from activities)
+              </div>
+            </div>
+            <div class="p-5" id="overview-kpis">
+              <!-- Generated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- MILESTONES PAGE -->
+        <div class="page" id="page-milestones">
+          <div class="text-[20px] font-semibold mb-1">Milestone Gates</div>
+          <div class="text-[12px] text-muted mb-6">
+            Edit phase gates and their dates for each stream. These drive the
+            timeline in the dashboard.
+          </div>
+
+          <div id="milestones-content"><!-- Generated --></div>
+          <button
+            class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 border-none bg-accent text-white hover:bg-[#3a7de0]"
+            onclick="openAddMilestone()"
+          >
+            + Add Milestone
+          </button>
+        </div>
+
+        <!-- DECISIONS PAGE -->
+        <div class="page" id="page-decisions">
+          <div class="text-[20px] font-semibold mb-1">Decisions Needed</div>
+          <div class="text-[12px] text-muted mb-6">
+            Items requiring managerial attention, shown in the dashboard alert
+            panel.
+          </div>
+
+          <div id="decisions-list"><!-- Generated --></div>
+          <button
+            class="flex items-center gap-[6px] py-2 px-[14px] bg-[#4f8ef714] border border-dashed border-[#4f8ef74d] rounded-lg text-accent text-xs cursor-pointer w-full justify-center mt-2.5 transition-all duration-150 font-sans hover:bg-[#4f8ef726]"
+            onclick="openAddDecision()"
+          >
+            + Add Decision Item
+          </button>
+        </div>
+
+        <!-- FABRICS PAGE -->
+        <div class="page" id="page-fabrics">
+          <div class="text-[20px] font-semibold mb-1 text-fabric">
+            🧵 Fabrics — Tecidos
+          </div>
+          <div class="text-[12px] text-muted mb-6">
+            Edit all fabric activities, statuses, responsible parties and dates.
+          </div>
+          <div id="stream-table-fabrics"></div>
+          <button
+            class="flex items-center gap-[6px] py-2 px-[14px] bg-[#4f8ef714] border border-dashed border-[#4f8ef74d] rounded-lg text-accent text-xs cursor-pointer w-full justify-center mt-2.5 transition-all duration-150 font-sans hover:bg-[#4f8ef726]"
+            onclick="openAddActivity('fabrics')"
+          >
+            + Add Activity
+          </button>
+        </div>
+
+        <!-- PAINTS PAGE -->
+        <div class="page" id="page-paints">
+          <div class="text-[20px] font-semibold mb-1 text-paint">
+            🎨 Paints — Tintas
+          </div>
+          <div class="text-[12px] text-muted mb-6">
+            Edit all paint activities, statuses, responsible parties and dates.
+          </div>
+          <div id="stream-table-paints"></div>
+          <button
+            class="flex items-center gap-[6px] py-2 px-[14px] bg-[#4f8ef714] border border-dashed border-[#4f8ef74d] rounded-lg text-accent text-xs cursor-pointer w-full justify-center mt-2.5 transition-all duration-150 font-sans hover:bg-[#4f8ef726]"
+            onclick="openAddActivity('paints')"
+          >
+            + Add Activity
+          </button>
+        </div>
+
+        <!-- TEXTURES PAGE -->
+        <div class="page" id="page-textures">
+          <div class="text-[20px] font-semibold mb-1 text-texture">
+            🔲 Textures — Texturas
+          </div>
+          <div class="text-[12px] text-muted mb-6">
+            Edit all texture activities, statuses, responsible parties and
+            dates.
+          </div>
+          <div id="stream-table-textures"></div>
+          <button
+            class="flex items-center gap-[6px] py-2 px-[14px] bg-[#4f8ef714] border border-dashed border-[#4f8ef74d] rounded-lg text-accent text-xs cursor-pointer w-full justify-center mt-2.5 transition-all duration-150 font-sans hover:bg-[#4f8ef726]"
+            onclick="openAddActivity('textures')"
+          >
+            + Add Activity
+          </button>
+        </div>
+
+        <!-- NOTES PAGE -->
+        <div class="page" id="page-notes">
+          <div class="text-[20px] font-semibold mb-1">Manager Notes</div>
+          <div class="text-[12px] text-muted mb-6">
+            Freeform notes shown in the dashboard. Auto-saved.
+          </div>
+          <div
+            class="bg-surface border border-border rounded-xl mb-4 overflow-hidden"
+          >
+            <div class="p-5">
+              <textarea
+                class="form-textarea"
+                id="notes-editor"
+                style="
+                  min-height: 300px;
+                  font-family: &quot;DM Mono&quot;, monospace;
+                  font-size: 12px;
+                  line-height: 1.7;
+                "
+                oninput="autoSaveNotes()"
+              ></textarea>
+              <div
+                class="text-[11px] text-muted mt-2"
+                id="notes-saved-indicator"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RAW JSON PAGE -->
+        <div class="page" id="page-rawjson">
+          <div class="text-[20px] font-semibold mb-1">Raw JSON</div>
+          <div class="text-[12px] text-muted mb-6">
+            View or paste raw JSON data. Use with caution.
+          </div>
+          <div
+            class="bg-surface border border-border rounded-xl mb-4 overflow-hidden"
+          >
+            <div
+              class="py-[14px] px-[20px] border-b border-border flex items-center justify-between"
+            >
+              <div class="text-[14px] font-semibold">Current Data Store</div>
+              <div class="flex gap-2">
+                <button
+                  class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border"
+                  onclick="refreshRawJSON()"
+                >
+                  ↻ Refresh
+                </button>
+                <button
+                  class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 border bg-ok/15 text-ok border-ok/30 hover:bg-ok/25"
+                  onclick="applyRawJSON()"
+                >
+                  Apply JSON
+                </button>
+              </div>
+            </div>
+            <div class="p-5">
+              <textarea
+                class="form-textarea"
+                id="raw-json-area"
+                style="
+                  min-height: 400px;
+                  font-family: &quot;DM Mono&quot;, monospace;
+                  font-size: 11px;
+                  line-height: 1.5;
+                "
+              ></textarea>
+            </div>
+          </div>
         </div>
       </div>
+      <!-- main-area -->
     </div>
+    <!-- layout -->
 
-  </div><!-- main-area -->
-</div><!-- layout -->
-
-<script>
-// ─── DEFAULT DATA ────────────────────────────────────────────────────────────
-const DEFAULT = {
-  config: {
-    projectCode: 'J1U',
-    projectName: 'CMF Microplanning',
-    sopDate: '2028-03-15',
-    sopLabel: 'MAR 2028',
-    timelineStart: '2025-02-01',
-    timelineEnd: '2028-04-01',
-    nextGate: 'SELECTION',
-    nextGateDetail: 'Fabrics · Mar 2026'
-  },
-  milestones: [
-    { id:'m1', stream:'fabrics',  name:'CMF Concept',     date:'2025-02-10', status:'done' },
-    { id:'m2', stream:'fabrics',  name:'CMF Direction',   date:'2025-10-24', status:'done' },
-    { id:'m3', stream:'fabrics',  name:'CMF Orientation', date:'2026-01-15', status:'done' },
-    { id:'m4', stream:'fabrics',  name:'CMF Selection',   date:'2026-07-01', status:'active' },
-    { id:'m5', stream:'fabrics',  name:'CMF Decision',    date:'2026-12-03', status:'upcoming' },
-    { id:'m6', stream:'paints',   name:'CMF Concept',     date:'2025-02-10', status:'done' },
-    { id:'m7', stream:'paints',   name:'CMF Direction',   date:'2025-06-20', status:'done' },
-    { id:'m8', stream:'paints',   name:'CMF Orientation', date:'2025-12-15', status:'done' },
-    { id:'m9', stream:'paints',   name:'Sourcing',        date:'2026-11-15', status:'active' },
-    { id:'m10',stream:'paints',   name:'Homologation',    date:'2028-01-03', status:'upcoming' },
-    { id:'m11',stream:'textures', name:'CMF Concept',     date:'2025-02-10', status:'done' },
-    { id:'m12',stream:'textures', name:'CMF Direction',   date:'2025-10-24', status:'done' },
-    { id:'m13',stream:'textures', name:'CMF Orientation', date:'2025-12-15', status:'done' },
-    { id:'m14',stream:'textures', name:'CMF Selection',   date:'2026-03-15', status:'done' },
-    { id:'m15',stream:'textures', name:'CMF Decision',    date:'2027-01-29', status:'active' },
-  ],
-  phases: {
-    fabrics: [
-      { id:'pf1', name:'Concept → Direction',    start:'2025-02-10', end:'2025-10-24', done:true },
-      { id:'pf2', name:'Direction → Orientation',start:'2025-10-24', end:'2026-01-15', done:true },
-      { id:'pf3', name:'Orientation → Selection',start:'2026-01-15', end:'2026-07-01', done:false, active:true },
-      { id:'pf4', name:'Selection → Decision',   start:'2026-07-01', end:'2026-12-03', done:false },
-      { id:'pf5', name:'Post Decision',          start:'2026-12-03', end:'2027-04-18', done:false },
-    ],
-    paints: [
-      { id:'pp1', name:'Concept → Direction',    start:'2025-02-10', end:'2025-06-20', done:true },
-      { id:'pp2', name:'Direction → Orientation',start:'2025-06-20', end:'2025-12-15', done:true },
-      { id:'pp3', name:'Orientation → Sourcing', start:'2025-12-15', end:'2026-11-15', done:false, active:true },
-      { id:'pp4', name:'Sourcing & Commercial',  start:'2026-11-15', end:'2027-05-08', done:false },
-      { id:'pp5', name:'Homologation',           start:'2027-05-08', end:'2028-01-03', done:false },
-      { id:'pp6', name:'Industrialization',      start:'2028-01-03', end:'2028-03-15', done:false },
-    ],
-    textures: [
-      { id:'pt1', name:'Concept → Direction',    start:'2025-02-10', end:'2025-10-24', done:true },
-      { id:'pt2', name:'Direction → Orientation',start:'2025-10-24', end:'2025-12-15', done:true },
-      { id:'pt3', name:'Orientation → Selection',start:'2025-12-15', end:'2026-03-15', done:true },
-      { id:'pt4', name:'Selection → Decision',   start:'2026-03-15', end:'2027-01-29', done:false, active:true },
-      { id:'pt5', name:'Post Decision',          start:'2027-01-29', end:'2027-10-16', done:false },
-    ]
-  },
-  activities: {
-    fabrics: [
-      { id:'af1',  num:'1',    name:'Kick-off meeting with all involved areas',                   responsible:'Stellantis',          status:'OK',      date:'2025-02-11', obs:'OK - Milestone review point 01/08/2025' },
-      { id:'af2',  num:'2',    name:'Request concept briefing + reference fabrics from Brand',    responsible:'Brand/Produto',        status:'OK',      date:'2025-02-12', obs:'OK' },
-      { id:'af3',  num:'3.1',  name:'Delivery of concept briefing',                              responsible:'Brand/Produto',        status:'OK',      date:'2025-05-30', obs:'OK' },
-      { id:'af4',  num:'3.2',  name:'Delivery of reference fabric indications by Produto & CCLP',responsible:'Produto/CCLP',         status:'OK',      date:'2025-05-30', obs:'OK Referência 521 MCA' },
-      { id:'af5',  num:'4',    name:'Design requests commercial info (Bid list) and tech sheet',  responsible:'Compras / Eng Int',    status:'OK',      date:'2025-05-31', obs:'OK Norma Harmonizada' },
-      { id:'af6',  num:'4.1',  name:'Elaboration of commercial info (Bid list)',                  responsible:'Compras',              status:'OK',      date:'2025-06-30', obs:'OK email 18/06 — bid list updated' },
-      { id:'af7',  num:'4.2',  name:'Elaboration of technical information',                       responsible:'Engenharia Interiors', status:'TBC',     date:'2025-06-30', obs:'A confirmar (VBOM)' },
-      { id:'af8',  num:'4.3',  name:'Discussion and elaboration of Design briefings (fabrics)',   responsible:'Design',               status:'OK',      date:'2025-08-14', obs:'OK — meeting held 11/07' },
-      { id:'af9',  num:'4.3.1','name':'Softness chart - Preliminary figurino',                    responsible:'Design',               status:'OK',      date:'2025-08-08', obs:'OK sent by SA team to QP' },
-      { id:'af10', num:'5',    name:'Send fabric briefing to suppliers + tech sheet',             responsible:'Design / Compras',     status:'OK',      date:'2025-08-08', obs:'OK online meeting and email sent to suppliers' },
-      { id:'af11', num:'5.1.1','name':'Add new player — schedule with Continental supplier',      responsible:'Design',               status:'Pending', date:'2025-08-20', obs:'Schedule per 13/08 checkpoint' },
-      { id:'af12', num:'5.1',  name:'Send Roadmap #1',                                           responsible:'Design',               status:'Pending', date:'2025-09-12', obs:'' },
-      { id:'af13', num:'6',    name:'Supplier fabric proposal development',                       responsible:'Fornecedor',           status:'Pending', date:'2025-09-27', obs:'' },
-      { id:'af14', num:'7',    name:'1st proposal loop by suppliers',                            responsible:'Fornecedor / Design',  status:'Pending', date:'2025-10-04', obs:'' },
-      { id:'af15', num:'8',    name:'Analysis and adjustment requests (pre-selected list)',       responsible:'Design',               status:'Pending', date:'2025-10-09', obs:'' },
-      { id:'af16', num:'9',    name:'2nd loop — supplier proposals + values + tech sheet',       responsible:'Fornecedor / Design',  status:'Pending', date:'2025-11-03', obs:'' },
-      { id:'af17', num:'10',   name:'New analysis and list revision + Roadmap #2',               responsible:'Design',               status:'Pending', date:'2025-11-10', obs:'' },
-      { id:'af18', num:'11',   name:'Quote 2nd loop list and send info to Design Center',        responsible:'Compras',              status:'Pending', date:'2025-10-16', obs:'Parallel with 1st loop analysis' },
-      { id:'af19', num:'12',   name:'Internal pre-selection of proposals',                       responsible:'Design',               status:'Pending', date:'2025-11-18', obs:'' },
-      { id:'af20', num:'13',   name:'Virtual seat assembly with pre-selected proposals',         responsible:'Design',               status:'Pending', date:'2025-11-13', obs:'Parallel with fabric development' },
-    ],
-    paints: [
-      { id:'ap1',  num:'1',  name:'Kick-off meeting with all involved areas',                      responsible:'Design / Compras / MTE',       status:'OK',      date:'2025-02-11', obs:'' },
-      { id:'ap2',  num:'2',  name:'Officialize number of launch/replacement colors to develop',    responsible:'Brand / Produto',              status:'OK',      date:'2025-02-21', obs:'' },
-      { id:'ap3',  num:'3',  name:'Design Target — elaboration and send to supplier',              responsible:'Compras',                      status:'OK',      date:'2025-04-07', obs:'' },
-      { id:'ap4',  num:'4',  name:'CMF briefing elaboration and sharing with Brand / Produto',     responsible:'Design',                       status:'OK',      date:'2025-04-07', obs:'' },
-      { id:'ap5',  num:'5',  name:'Send agreed briefing to suppliers',                            responsible:'Design',                       status:'OK',      date:'2025-04-08', obs:'' },
-      { id:'ap6',  num:'6',  name:'Supplier color proposal development',                          responsible:'Fornecedor',                   status:'OK',      date:'2025-06-07', obs:'' },
-      { id:'ap7',  num:'7',  name:'1st loop supplier proposals (physical)',                       responsible:'Fornecedor / Design',          status:'OK',      date:'2025-06-10', obs:'' },
-      { id:'ap8',  num:'8',  name:'Analysis and adjustment requests',                             responsible:'Design',                       status:'OK',      date:'2025-06-20', obs:'' },
-      { id:'ap9',  num:'9',  name:'2nd loop supplier proposals + values + tech sheet',            responsible:'Fornecedor / Design',          status:'OK',      date:'2025-07-20', obs:'' },
-      { id:'ap10', num:'10', name:'New analysis and revision of pre-selected paints',             responsible:'Design',                       status:'OK',      date:'2025-07-23', obs:'' },
-      { id:'ap11', num:'11', name:'Prepare virtual simulation for presentation',                  responsible:'Design',                       status:'OK',      date:'2025-08-12', obs:'' },
-      { id:'ap12', num:'12', name:'Internal presentation of virtual proposals + physical plates', responsible:'Design',                       status:'OK',      date:'2025-08-15', obs:'' },
-      { id:'ap13', num:'13', name:'Presentation to technical team — choose 3 proposals',          responsible:'Design / Brand / Produto',     status:'OK',      date:'2025-10-25', obs:'' },
-      { id:'ap14', num:'14', name:'Info on pre-selected samples for feasibility testing',         responsible:'Design',                       status:'OK',      date:'2025-10-25', obs:'' },
-      { id:'ap15', num:'15', name:'Feasibility tests',                                            responsible:'MTE / Fornecedor',             status:'OK',      date:'2025-10-27', obs:'' },
-      { id:'ap16', num:'16', name:'Results evaluation',                                           responsible:'MTE / Fornecedor',             status:'OK',      date:'2025-12-08', obs:'' },
-      { id:'ap17', num:'17', name:'Formula adjustment and final registration',                    responsible:'MTE / Fornecedor',             status:'OK',      date:'2025-12-12', obs:'' },
-      { id:'ap18', num:'18', name:'Report issuance and send to Stellantis with samples',          responsible:'MTE / Fornecedor',             status:'OK',      date:'2025-12-17', obs:'' },
-      { id:'ap19', num:'19', name:'Technical report evaluation + approval + send to Design',      responsible:'MTE / Design',                 status:'OK',      date:'2025-12-19', obs:'' },
-      { id:'ap20', num:'20', name:'Update virtual simulation for second selection',               responsible:'Design',                       status:'Pending', date:'2026-01-03', obs:'' },
-      { id:'ap21', num:'21', name:'Internal presentation of updated virtual proposals',           responsible:'Design',                       status:'Pending', date:'2026-01-06', obs:'' },
-      { id:'ap22', num:'22', name:'Presentation to technical team — final selection',             responsible:'Design / Brand / Produto',     status:'Pending', date:'2026-01-07', obs:'' },
-      { id:'ap23', num:'23', name:'Request selected paints for model painting',                   responsible:'Design',                       status:'Pending', date:'2026-01-08', obs:'' },
-      { id:'ap24', num:'24', name:'Begin preparation of model to be painted',                     responsible:'Design',                       status:'Pending', date:'2026-01-08', obs:'' },
-      { id:'ap25', num:'25', name:'Valuation of new colors',                                      responsible:'Compras',                      status:'Pending', date:'2026-02-02', obs:'' },
-      { id:'ap26', num:'33', name:'Final SASR presentation for color definition',                 responsible:'Time',                         status:'Pending', date:'2026-02-28', obs:'' },
-      { id:'ap27', num:'35', name:'Analysis of selected color list',                              responsible:'Compras',                      status:'Pending', date:'2026-03-20', obs:'' },
-    ],
-    textures: [
-      { id:'at1',  num:'1',  name:'Kick-off meeting — technical alignment',                        responsible:'Design / Compras / MTE',           status:'OK',  date:'2025-02-11', obs:'OK' },
-      { id:'at2',  num:'2',  name:'Identify eligible suppliers for development',                    responsible:'Compras',                          status:'OK',  date:'2025-03-13', obs:'TBC' },
-      { id:'at3',  num:'5',  name:'Officialize commercial info and color/texture harmony',          responsible:'Compras / QP',                     status:'OK',  date:'2025-03-15', obs:'TBC' },
-      { id:'at4',  num:'6',  name:'Discussion and elaboration of Design briefings',                 responsible:'Design',                           status:'OK',  date:'2025-04-14', obs:'TBC' },
-      { id:'at5',  num:'8',  name:'Briefing event — send to suppliers + cost reference values',    responsible:'Design / Eng Custos',              status:'OK',  date:'2025-04-16', obs:'TBC' },
-      { id:'at6',  num:'9',  name:'Supplier texture proposal development',                         responsible:'Fornecedor',                       status:'OK',  date:'2025-06-25', obs:'OK' },
-      { id:'at7',  num:'10', name:'1st loop — supplier proposal presentation',                     responsible:'Fornecedor / Design',              status:'OK',  date:'2025-06-30', obs:'OK' },
-      { id:'at8',  num:'11', name:'Analysis and adjustment requests',                              responsible:'Design',                           status:'OK',  date:'2025-07-10', obs:'OK' },
-      { id:'at9',  num:'12', name:'2nd loop — supplier proposals with adjustments',                responsible:'Fornecedor / Design',              status:'OK',  date:'2025-08-27', obs:'OK' },
-      { id:'at10', num:'13', name:'New analysis and proposal revision',                            responsible:'Design',                           status:'OK',  date:'2025-09-01', obs:'OK' },
-      { id:'at11', num:'14', name:'Virtual assembly of pre-selected proposals (renders int/ext)',   responsible:'Design',                           status:'OK',  date:'2025-10-01', obs:'OK' },
-      { id:'at12', num:'15', name:'Presentation to Brand & Produto — virtual + physical samples',  responsible:'Design',                           status:'OK',  date:'2025-10-06', obs:'OK' },
-      { id:'at13', num:'15b','name':'Scratchability test of 2nd loop pre-selected samples',        responsible:'MTE',                              status:'OK',  date:'2025-11-25', obs:'OK' },
-      { id:'at14', num:'16', name:'3rd loop — fine-tuning proposals by suppliers',                 responsible:'Fornecedor / Design',              status:'OK',  date:'2025-11-25', obs:'OK' },
-      { id:'at15', num:'17', name:'Internal pre-selection of proposals',                           responsible:'Design',                           status:'OK',  date:'2025-12-05', obs:'OK' },
-      { id:'at16', num:'18', name:'Update virtual proposals (renders int/ext)',                    responsible:'Design',                           status:'OK',  date:'2026-01-09', obs:'OK' },
-      { id:'at17', num:'19', name:'Presentation to Brand & Produto — 3rd loop virtual + physical', responsible:'Design / Compras / Produto / Brand', status:'OK', date:'2026-01-16', obs:'OK' },
-      { id:'at18', num:'20', name:'Inform pre-selected proposals to Eng, MTE, QP, Compras',        responsible:'Design',                           status:'OK',  date:'2026-01-23', obs:'OK' },
-      { id:'at19', num:'21', name:'Request raw material from MTE to resin supplier',               responsible:'MTE / Fornecedor',                 status:'OK',  date:'2026-03-24', obs:'OK' },
-      { id:'at20', num:'35', name:'2nd loop pre-feasibility technical tests',                      responsible:'MTE',                              status:'OK',  date:'2027-01-04', obs:'OK' },
-      { id:'at21', num:'36', name:'Result — 2nd loop pre-deliberation analysis',                   responsible:'Eng Materiais (MTE)',               status:'OK',  date:'2027-01-09', obs:'OK' },
-      { id:'at22', num:'37', name:'Technical advancement of physical proposals',                   responsible:'Design / Compras / MTE',           status:'OK',  date:'2027-01-14', obs:'OK' },
-      { id:'at23', num:'38', name:'Director advancement of physical proposals (SASR)',              responsible:'Time',                             status:'OK',  date:'2027-01-24', obs:'OK' },
-      { id:'at24', num:'39', name:'SASR approval formalization',                                   responsible:'Design',                           status:'OK',  date:'2027-01-29', obs:'OK' },
-      { id:'at25', num:'40', name:'Send provisional figurinos with approved textures',             responsible:'Design',                           status:'OK',  date:'2027-02-05', obs:'OK' },
-      { id:'at26', num:'41', name:'Creation and disclosure of codes for new textures',             responsible:'MTE',                              status:'OK',  date:'2027-03-07', obs:'OK' },
-      { id:'at27', num:'42', name:'Elaboration of Official Figurino',                             responsible:'Design',                           status:'OK',  date:'2027-03-14', obs:'OK' },
-      { id:'at28', num:'43', name:'Officialize/disclose Official Figurino',                        responsible:'Qualidade Percebida',              status:'TBC', date:'2027-03-21', obs:'TBC' },
-      { id:'at29', num:'44', name:'Homologation of defined textures',                             responsible:'Eng Materiais (MTE) / Plataforma', status:'OK',  date:'2027-05-05', obs:'OK' },
-      { id:'at30', num:'45', name:'Nomination of chosen suppliers',                               responsible:'Compras',                          status:'TBC', date:'2027-05-25', obs:'TBC' },
-      { id:'at31', num:'46', name:'TKO',                                                          responsible:'Plataforma / Engenharia Interior', status:'OK',  date:'2027-05-26', obs:'OK' },
-      { id:'at32', num:'49b','name':'EBOM material codes request process',                         responsible:'Eng Materiais (MTE)',               status:'TBC', date:'2027-06-18', obs:'TBC — await confirmation' },
-      { id:'at33', num:'50', name:'Technical label marking of masters',                           responsible:'Eng Materiais (MTE)',               status:'OK',  date:'2027-10-09', obs:'OK' },
-      { id:'at34', num:'52', name:'Sample sealing (cartelino/amarelo)',                            responsible:'Arquivo Técnico EBOM',             status:'TBC', date:'2027-10-16', obs:'TBC' },
-    ]
-  },
-  decisions: [
-    { id:'d1', title:'CMF Selection Gate · Fabrics',           stream:'fabrics',  priority:'urgent', detail:'Selection milestone — supplier nomination pending. 51 activities not yet started require acceleration.' },
-    { id:'d2', title:'VBOM Technical Information Missing',      stream:'fabrics',  priority:'urgent', detail:'Activity 4.2 (Eng. Interiors tech info) marked "A confirmar (VBOM)" — blocks downstream activities.' },
-    { id:'d3', title:'Continental Supplier Onboarding',         stream:'fabrics',  priority:'medium', detail:'New vinyl player (activity 5.1.1) needs to be scheduled. Addition to bid list confirmed.' },
-    { id:'d4', title:'8 TBC Activities in Textures',           stream:'textures', priority:'medium', detail:'Activities flagged TBC including EBOM code process (49b), sample sealing, supplier nomination — need deadline commitment.' },
-    { id:'d5', title:'Paints: Sourcing Process Active',         stream:'paints',   priority:'info',   detail:'120-day sourcing process underway. Color definition must be locked by ORIENTATION — confirmed on track.' },
-  ],
-  notes: `PROGRAM STATUS — J1U CMF MICROPLANNING
+    <script>
+      // ─── DEFAULT DATA ────────────────────────────────────────────────────────────
+      const DEFAULT = {
+        config: {
+          projectCode: "J1U",
+          projectName: "CMF Microplanning",
+          sopDate: "2028-03-15",
+          sopLabel: "MAR 2028",
+          timelineStart: "2025-02-01",
+          timelineEnd: "2028-04-01",
+          nextGate: "SELECTION",
+          nextGateDetail: "Fabrics · Mar 2026",
+        },
+        milestones: [
+          {
+            id: "m1",
+            stream: "fabrics",
+            name: "CMF Concept",
+            date: "2025-02-10",
+            status: "done",
+          },
+          {
+            id: "m2",
+            stream: "fabrics",
+            name: "CMF Direction",
+            date: "2025-10-24",
+            status: "done",
+          },
+          {
+            id: "m3",
+            stream: "fabrics",
+            name: "CMF Orientation",
+            date: "2026-01-15",
+            status: "done",
+          },
+          {
+            id: "m4",
+            stream: "fabrics",
+            name: "CMF Selection",
+            date: "2026-07-01",
+            status: "active",
+          },
+          {
+            id: "m5",
+            stream: "fabrics",
+            name: "CMF Decision",
+            date: "2026-12-03",
+            status: "upcoming",
+          },
+          {
+            id: "m6",
+            stream: "paints",
+            name: "CMF Concept",
+            date: "2025-02-10",
+            status: "done",
+          },
+          {
+            id: "m7",
+            stream: "paints",
+            name: "CMF Direction",
+            date: "2025-06-20",
+            status: "done",
+          },
+          {
+            id: "m8",
+            stream: "paints",
+            name: "CMF Orientation",
+            date: "2025-12-15",
+            status: "done",
+          },
+          {
+            id: "m9",
+            stream: "paints",
+            name: "Sourcing",
+            date: "2026-11-15",
+            status: "active",
+          },
+          {
+            id: "m10",
+            stream: "paints",
+            name: "Homologation",
+            date: "2028-01-03",
+            status: "upcoming",
+          },
+          {
+            id: "m11",
+            stream: "textures",
+            name: "CMF Concept",
+            date: "2025-02-10",
+            status: "done",
+          },
+          {
+            id: "m12",
+            stream: "textures",
+            name: "CMF Direction",
+            date: "2025-10-24",
+            status: "done",
+          },
+          {
+            id: "m13",
+            stream: "textures",
+            name: "CMF Orientation",
+            date: "2025-12-15",
+            status: "done",
+          },
+          {
+            id: "m14",
+            stream: "textures",
+            name: "CMF Selection",
+            date: "2026-03-15",
+            status: "done",
+          },
+          {
+            id: "m15",
+            stream: "textures",
+            name: "CMF Decision",
+            date: "2027-01-29",
+            status: "active",
+          },
+        ],
+        phases: {
+          fabrics: [
+            {
+              id: "pf1",
+              name: "Concept → Direction",
+              start: "2025-02-10",
+              end: "2025-10-24",
+              done: true,
+            },
+            {
+              id: "pf2",
+              name: "Direction → Orientation",
+              start: "2025-10-24",
+              end: "2026-01-15",
+              done: true,
+            },
+            {
+              id: "pf3",
+              name: "Orientation → Selection",
+              start: "2026-01-15",
+              end: "2026-07-01",
+              done: false,
+              active: true,
+            },
+            {
+              id: "pf4",
+              name: "Selection → Decision",
+              start: "2026-07-01",
+              end: "2026-12-03",
+              done: false,
+            },
+            {
+              id: "pf5",
+              name: "Post Decision",
+              start: "2026-12-03",
+              end: "2027-04-18",
+              done: false,
+            },
+          ],
+          paints: [
+            {
+              id: "pp1",
+              name: "Concept → Direction",
+              start: "2025-02-10",
+              end: "2025-06-20",
+              done: true,
+            },
+            {
+              id: "pp2",
+              name: "Direction → Orientation",
+              start: "2025-06-20",
+              end: "2025-12-15",
+              done: true,
+            },
+            {
+              id: "pp3",
+              name: "Orientation → Sourcing",
+              start: "2025-12-15",
+              end: "2026-11-15",
+              done: false,
+              active: true,
+            },
+            {
+              id: "pp4",
+              name: "Sourcing & Commercial",
+              start: "2026-11-15",
+              end: "2027-05-08",
+              done: false,
+            },
+            {
+              id: "pp5",
+              name: "Homologation",
+              start: "2027-05-08",
+              end: "2028-01-03",
+              done: false,
+            },
+            {
+              id: "pp6",
+              name: "Industrialization",
+              start: "2028-01-03",
+              end: "2028-03-15",
+              done: false,
+            },
+          ],
+          textures: [
+            {
+              id: "pt1",
+              name: "Concept → Direction",
+              start: "2025-02-10",
+              end: "2025-10-24",
+              done: true,
+            },
+            {
+              id: "pt2",
+              name: "Direction → Orientation",
+              start: "2025-10-24",
+              end: "2025-12-15",
+              done: true,
+            },
+            {
+              id: "pt3",
+              name: "Orientation → Selection",
+              start: "2025-12-15",
+              end: "2026-03-15",
+              done: true,
+            },
+            {
+              id: "pt4",
+              name: "Selection → Decision",
+              start: "2026-03-15",
+              end: "2027-01-29",
+              done: false,
+              active: true,
+            },
+            {
+              id: "pt5",
+              name: "Post Decision",
+              start: "2027-01-29",
+              end: "2027-10-16",
+              done: false,
+            },
+          ],
+        },
+        activities: {
+          fabrics: [
+            {
+              id: "af1",
+              num: "1",
+              name: "Kick-off meeting with all involved areas",
+              responsible: "Stellantis",
+              status: "OK",
+              date: "2025-02-11",
+              obs: "OK - Milestone review point 01/08/2025",
+            },
+            {
+              id: "af2",
+              num: "2",
+              name: "Request concept briefing + reference fabrics from Brand",
+              responsible: "Brand/Produto",
+              status: "OK",
+              date: "2025-02-12",
+              obs: "OK",
+            },
+            {
+              id: "af3",
+              num: "3.1",
+              name: "Delivery of concept briefing",
+              responsible: "Brand/Produto",
+              status: "OK",
+              date: "2025-05-30",
+              obs: "OK",
+            },
+            {
+              id: "af4",
+              num: "3.2",
+              name: "Delivery of reference fabric indications by Produto & CCLP",
+              responsible: "Produto/CCLP",
+              status: "OK",
+              date: "2025-05-30",
+              obs: "OK Referência 521 MCA",
+            },
+            {
+              id: "af5",
+              num: "4",
+              name: "Design requests commercial info (Bid list) and tech sheet",
+              responsible: "Compras / Eng Int",
+              status: "OK",
+              date: "2025-05-31",
+              obs: "OK Norma Harmonizada",
+            },
+            {
+              id: "af6",
+              num: "4.1",
+              name: "Elaboration of commercial info (Bid list)",
+              responsible: "Compras",
+              status: "OK",
+              date: "2025-06-30",
+              obs: "OK email 18/06 — bid list updated",
+            },
+            {
+              id: "af7",
+              num: "4.2",
+              name: "Elaboration of technical information",
+              responsible: "Engenharia Interiors",
+              status: "TBC",
+              date: "2025-06-30",
+              obs: "A confirmar (VBOM)",
+            },
+            {
+              id: "af8",
+              num: "4.3",
+              name: "Discussion and elaboration of Design briefings (fabrics)",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-08-14",
+              obs: "OK — meeting held 11/07",
+            },
+            {
+              id: "af9",
+              num: "4.3.1",
+              name: "Softness chart - Preliminary figurino",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-08-08",
+              obs: "OK sent by SA team to QP",
+            },
+            {
+              id: "af10",
+              num: "5",
+              name: "Send fabric briefing to suppliers + tech sheet",
+              responsible: "Design / Compras",
+              status: "OK",
+              date: "2025-08-08",
+              obs: "OK online meeting and email sent to suppliers",
+            },
+            {
+              id: "af11",
+              num: "5.1.1",
+              name: "Add new player — schedule with Continental supplier",
+              responsible: "Design",
+              status: "Pending",
+              date: "2025-08-20",
+              obs: "Schedule per 13/08 checkpoint",
+            },
+            {
+              id: "af12",
+              num: "5.1",
+              name: "Send Roadmap #1",
+              responsible: "Design",
+              status: "Pending",
+              date: "2025-09-12",
+              obs: "",
+            },
+            {
+              id: "af13",
+              num: "6",
+              name: "Supplier fabric proposal development",
+              responsible: "Fornecedor",
+              status: "Pending",
+              date: "2025-09-27",
+              obs: "",
+            },
+            {
+              id: "af14",
+              num: "7",
+              name: "1st proposal loop by suppliers",
+              responsible: "Fornecedor / Design",
+              status: "Pending",
+              date: "2025-10-04",
+              obs: "",
+            },
+            {
+              id: "af15",
+              num: "8",
+              name: "Analysis and adjustment requests (pre-selected list)",
+              responsible: "Design",
+              status: "Pending",
+              date: "2025-10-09",
+              obs: "",
+            },
+            {
+              id: "af16",
+              num: "9",
+              name: "2nd loop — supplier proposals + values + tech sheet",
+              responsible: "Fornecedor / Design",
+              status: "Pending",
+              date: "2025-11-03",
+              obs: "",
+            },
+            {
+              id: "af17",
+              num: "10",
+              name: "New analysis and list revision + Roadmap #2",
+              responsible: "Design",
+              status: "Pending",
+              date: "2025-11-10",
+              obs: "",
+            },
+            {
+              id: "af18",
+              num: "11",
+              name: "Quote 2nd loop list and send info to Design Center",
+              responsible: "Compras",
+              status: "Pending",
+              date: "2025-10-16",
+              obs: "Parallel with 1st loop analysis",
+            },
+            {
+              id: "af19",
+              num: "12",
+              name: "Internal pre-selection of proposals",
+              responsible: "Design",
+              status: "Pending",
+              date: "2025-11-18",
+              obs: "",
+            },
+            {
+              id: "af20",
+              num: "13",
+              name: "Virtual seat assembly with pre-selected proposals",
+              responsible: "Design",
+              status: "Pending",
+              date: "2025-11-13",
+              obs: "Parallel with fabric development",
+            },
+          ],
+          paints: [
+            {
+              id: "ap1",
+              num: "1",
+              name: "Kick-off meeting with all involved areas",
+              responsible: "Design / Compras / MTE",
+              status: "OK",
+              date: "2025-02-11",
+              obs: "",
+            },
+            {
+              id: "ap2",
+              num: "2",
+              name: "Officialize number of launch/replacement colors to develop",
+              responsible: "Brand / Produto",
+              status: "OK",
+              date: "2025-02-21",
+              obs: "",
+            },
+            {
+              id: "ap3",
+              num: "3",
+              name: "Design Target — elaboration and send to supplier",
+              responsible: "Compras",
+              status: "OK",
+              date: "2025-04-07",
+              obs: "",
+            },
+            {
+              id: "ap4",
+              num: "4",
+              name: "CMF briefing elaboration and sharing with Brand / Produto",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-04-07",
+              obs: "",
+            },
+            {
+              id: "ap5",
+              num: "5",
+              name: "Send agreed briefing to suppliers",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-04-08",
+              obs: "",
+            },
+            {
+              id: "ap6",
+              num: "6",
+              name: "Supplier color proposal development",
+              responsible: "Fornecedor",
+              status: "OK",
+              date: "2025-06-07",
+              obs: "",
+            },
+            {
+              id: "ap7",
+              num: "7",
+              name: "1st loop supplier proposals (physical)",
+              responsible: "Fornecedor / Design",
+              status: "OK",
+              date: "2025-06-10",
+              obs: "",
+            },
+            {
+              id: "ap8",
+              num: "8",
+              name: "Analysis and adjustment requests",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-06-20",
+              obs: "",
+            },
+            {
+              id: "ap9",
+              num: "9",
+              name: "2nd loop supplier proposals + values + tech sheet",
+              responsible: "Fornecedor / Design",
+              status: "OK",
+              date: "2025-07-20",
+              obs: "",
+            },
+            {
+              id: "ap10",
+              num: "10",
+              name: "New analysis and revision of pre-selected paints",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-07-23",
+              obs: "",
+            },
+            {
+              id: "ap11",
+              num: "11",
+              name: "Prepare virtual simulation for presentation",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-08-12",
+              obs: "",
+            },
+            {
+              id: "ap12",
+              num: "12",
+              name: "Internal presentation of virtual proposals + physical plates",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-08-15",
+              obs: "",
+            },
+            {
+              id: "ap13",
+              num: "13",
+              name: "Presentation to technical team — choose 3 proposals",
+              responsible: "Design / Brand / Produto",
+              status: "OK",
+              date: "2025-10-25",
+              obs: "",
+            },
+            {
+              id: "ap14",
+              num: "14",
+              name: "Info on pre-selected samples for feasibility testing",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-10-25",
+              obs: "",
+            },
+            {
+              id: "ap15",
+              num: "15",
+              name: "Feasibility tests",
+              responsible: "MTE / Fornecedor",
+              status: "OK",
+              date: "2025-10-27",
+              obs: "",
+            },
+            {
+              id: "ap16",
+              num: "16",
+              name: "Results evaluation",
+              responsible: "MTE / Fornecedor",
+              status: "OK",
+              date: "2025-12-08",
+              obs: "",
+            },
+            {
+              id: "ap17",
+              num: "17",
+              name: "Formula adjustment and final registration",
+              responsible: "MTE / Fornecedor",
+              status: "OK",
+              date: "2025-12-12",
+              obs: "",
+            },
+            {
+              id: "ap18",
+              num: "18",
+              name: "Report issuance and send to Stellantis with samples",
+              responsible: "MTE / Fornecedor",
+              status: "OK",
+              date: "2025-12-17",
+              obs: "",
+            },
+            {
+              id: "ap19",
+              num: "19",
+              name: "Technical report evaluation + approval + send to Design",
+              responsible: "MTE / Design",
+              status: "OK",
+              date: "2025-12-19",
+              obs: "",
+            },
+            {
+              id: "ap20",
+              num: "20",
+              name: "Update virtual simulation for second selection",
+              responsible: "Design",
+              status: "Pending",
+              date: "2026-01-03",
+              obs: "",
+            },
+            {
+              id: "ap21",
+              num: "21",
+              name: "Internal presentation of updated virtual proposals",
+              responsible: "Design",
+              status: "Pending",
+              date: "2026-01-06",
+              obs: "",
+            },
+            {
+              id: "ap22",
+              num: "22",
+              name: "Presentation to technical team — final selection",
+              responsible: "Design / Brand / Produto",
+              status: "Pending",
+              date: "2026-01-07",
+              obs: "",
+            },
+            {
+              id: "ap23",
+              num: "23",
+              name: "Request selected paints for model painting",
+              responsible: "Design",
+              status: "Pending",
+              date: "2026-01-08",
+              obs: "",
+            },
+            {
+              id: "ap24",
+              num: "24",
+              name: "Begin preparation of model to be painted",
+              responsible: "Design",
+              status: "Pending",
+              date: "2026-01-08",
+              obs: "",
+            },
+            {
+              id: "ap25",
+              num: "25",
+              name: "Valuation of new colors",
+              responsible: "Compras",
+              status: "Pending",
+              date: "2026-02-02",
+              obs: "",
+            },
+            {
+              id: "ap26",
+              num: "33",
+              name: "Final SASR presentation for color definition",
+              responsible: "Time",
+              status: "Pending",
+              date: "2026-02-28",
+              obs: "",
+            },
+            {
+              id: "ap27",
+              num: "35",
+              name: "Analysis of selected color list",
+              responsible: "Compras",
+              status: "Pending",
+              date: "2026-03-20",
+              obs: "",
+            },
+          ],
+          textures: [
+            {
+              id: "at1",
+              num: "1",
+              name: "Kick-off meeting — technical alignment",
+              responsible: "Design / Compras / MTE",
+              status: "OK",
+              date: "2025-02-11",
+              obs: "OK",
+            },
+            {
+              id: "at2",
+              num: "2",
+              name: "Identify eligible suppliers for development",
+              responsible: "Compras",
+              status: "OK",
+              date: "2025-03-13",
+              obs: "TBC",
+            },
+            {
+              id: "at3",
+              num: "5",
+              name: "Officialize commercial info and color/texture harmony",
+              responsible: "Compras / QP",
+              status: "OK",
+              date: "2025-03-15",
+              obs: "TBC",
+            },
+            {
+              id: "at4",
+              num: "6",
+              name: "Discussion and elaboration of Design briefings",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-04-14",
+              obs: "TBC",
+            },
+            {
+              id: "at5",
+              num: "8",
+              name: "Briefing event — send to suppliers + cost reference values",
+              responsible: "Design / Eng Custos",
+              status: "OK",
+              date: "2025-04-16",
+              obs: "TBC",
+            },
+            {
+              id: "at6",
+              num: "9",
+              name: "Supplier texture proposal development",
+              responsible: "Fornecedor",
+              status: "OK",
+              date: "2025-06-25",
+              obs: "OK",
+            },
+            {
+              id: "at7",
+              num: "10",
+              name: "1st loop — supplier proposal presentation",
+              responsible: "Fornecedor / Design",
+              status: "OK",
+              date: "2025-06-30",
+              obs: "OK",
+            },
+            {
+              id: "at8",
+              num: "11",
+              name: "Analysis and adjustment requests",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-07-10",
+              obs: "OK",
+            },
+            {
+              id: "at9",
+              num: "12",
+              name: "2nd loop — supplier proposals with adjustments",
+              responsible: "Fornecedor / Design",
+              status: "OK",
+              date: "2025-08-27",
+              obs: "OK",
+            },
+            {
+              id: "at10",
+              num: "13",
+              name: "New analysis and proposal revision",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-09-01",
+              obs: "OK",
+            },
+            {
+              id: "at11",
+              num: "14",
+              name: "Virtual assembly of pre-selected proposals (renders int/ext)",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-10-01",
+              obs: "OK",
+            },
+            {
+              id: "at12",
+              num: "15",
+              name: "Presentation to Brand & Produto — virtual + physical samples",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-10-06",
+              obs: "OK",
+            },
+            {
+              id: "at13",
+              num: "15b",
+              name: "Scratchability test of 2nd loop pre-selected samples",
+              responsible: "MTE",
+              status: "OK",
+              date: "2025-11-25",
+              obs: "OK",
+            },
+            {
+              id: "at14",
+              num: "16",
+              name: "3rd loop — fine-tuning proposals by suppliers",
+              responsible: "Fornecedor / Design",
+              status: "OK",
+              date: "2025-11-25",
+              obs: "OK",
+            },
+            {
+              id: "at15",
+              num: "17",
+              name: "Internal pre-selection of proposals",
+              responsible: "Design",
+              status: "OK",
+              date: "2025-12-05",
+              obs: "OK",
+            },
+            {
+              id: "at16",
+              num: "18",
+              name: "Update virtual proposals (renders int/ext)",
+              responsible: "Design",
+              status: "OK",
+              date: "2026-01-09",
+              obs: "OK",
+            },
+            {
+              id: "at17",
+              num: "19",
+              name: "Presentation to Brand & Produto — 3rd loop virtual + physical",
+              responsible: "Design / Compras / Produto / Brand",
+              status: "OK",
+              date: "2026-01-16",
+              obs: "OK",
+            },
+            {
+              id: "at18",
+              num: "20",
+              name: "Inform pre-selected proposals to Eng, MTE, QP, Compras",
+              responsible: "Design",
+              status: "OK",
+              date: "2026-01-23",
+              obs: "OK",
+            },
+            {
+              id: "at19",
+              num: "21",
+              name: "Request raw material from MTE to resin supplier",
+              responsible: "MTE / Fornecedor",
+              status: "OK",
+              date: "2026-03-24",
+              obs: "OK",
+            },
+            {
+              id: "at20",
+              num: "35",
+              name: "2nd loop pre-feasibility technical tests",
+              responsible: "MTE",
+              status: "OK",
+              date: "2027-01-04",
+              obs: "OK",
+            },
+            {
+              id: "at21",
+              num: "36",
+              name: "Result — 2nd loop pre-deliberation analysis",
+              responsible: "Eng Materiais (MTE)",
+              status: "OK",
+              date: "2027-01-09",
+              obs: "OK",
+            },
+            {
+              id: "at22",
+              num: "37",
+              name: "Technical advancement of physical proposals",
+              responsible: "Design / Compras / MTE",
+              status: "OK",
+              date: "2027-01-14",
+              obs: "OK",
+            },
+            {
+              id: "at23",
+              num: "38",
+              name: "Director advancement of physical proposals (SASR)",
+              responsible: "Time",
+              status: "OK",
+              date: "2027-01-24",
+              obs: "OK",
+            },
+            {
+              id: "at24",
+              num: "39",
+              name: "SASR approval formalization",
+              responsible: "Design",
+              status: "OK",
+              date: "2027-01-29",
+              obs: "OK",
+            },
+            {
+              id: "at25",
+              num: "40",
+              name: "Send provisional figurinos with approved textures",
+              responsible: "Design",
+              status: "OK",
+              date: "2027-02-05",
+              obs: "OK",
+            },
+            {
+              id: "at26",
+              num: "41",
+              name: "Creation and disclosure of codes for new textures",
+              responsible: "MTE",
+              status: "OK",
+              date: "2027-03-07",
+              obs: "OK",
+            },
+            {
+              id: "at27",
+              num: "42",
+              name: "Elaboration of Official Figurino",
+              responsible: "Design",
+              status: "OK",
+              date: "2027-03-14",
+              obs: "OK",
+            },
+            {
+              id: "at28",
+              num: "43",
+              name: "Officialize/disclose Official Figurino",
+              responsible: "Qualidade Percebida",
+              status: "TBC",
+              date: "2027-03-21",
+              obs: "TBC",
+            },
+            {
+              id: "at29",
+              num: "44",
+              name: "Homologation of defined textures",
+              responsible: "Eng Materiais (MTE) / Plataforma",
+              status: "OK",
+              date: "2027-05-05",
+              obs: "OK",
+            },
+            {
+              id: "at30",
+              num: "45",
+              name: "Nomination of chosen suppliers",
+              responsible: "Compras",
+              status: "TBC",
+              date: "2027-05-25",
+              obs: "TBC",
+            },
+            {
+              id: "at31",
+              num: "46",
+              name: "TKO",
+              responsible: "Plataforma / Engenharia Interior",
+              status: "OK",
+              date: "2027-05-26",
+              obs: "OK",
+            },
+            {
+              id: "at32",
+              num: "49b",
+              name: "EBOM material codes request process",
+              responsible: "Eng Materiais (MTE)",
+              status: "TBC",
+              date: "2027-06-18",
+              obs: "TBC — await confirmation",
+            },
+            {
+              id: "at33",
+              num: "50",
+              name: "Technical label marking of masters",
+              responsible: "Eng Materiais (MTE)",
+              status: "OK",
+              date: "2027-10-09",
+              obs: "OK",
+            },
+            {
+              id: "at34",
+              num: "52",
+              name: "Sample sealing (cartelino/amarelo)",
+              responsible: "Arquivo Técnico EBOM",
+              status: "TBC",
+              date: "2027-10-16",
+              obs: "TBC",
+            },
+          ],
+        },
+        decisions: [
+          {
+            id: "d1",
+            title: "CMF Selection Gate · Fabrics",
+            stream: "fabrics",
+            priority: "urgent",
+            detail:
+              "Selection milestone — supplier nomination pending. 51 activities not yet started require acceleration.",
+          },
+          {
+            id: "d2",
+            title: "VBOM Technical Information Missing",
+            stream: "fabrics",
+            priority: "urgent",
+            detail:
+              'Activity 4.2 (Eng. Interiors tech info) marked "A confirmar (VBOM)" — blocks downstream activities.',
+          },
+          {
+            id: "d3",
+            title: "Continental Supplier Onboarding",
+            stream: "fabrics",
+            priority: "medium",
+            detail:
+              "New vinyl player (activity 5.1.1) needs to be scheduled. Addition to bid list confirmed.",
+          },
+          {
+            id: "d4",
+            title: "8 TBC Activities in Textures",
+            stream: "textures",
+            priority: "medium",
+            detail:
+              "Activities flagged TBC including EBOM code process (49b), sample sealing, supplier nomination — need deadline commitment.",
+          },
+          {
+            id: "d5",
+            title: "Paints: Sourcing Process Active",
+            stream: "paints",
+            priority: "info",
+            detail:
+              "120-day sourcing process underway. Color definition must be locked by ORIENTATION — confirmed on track.",
+          },
+        ],
+        notes: `PROGRAM STATUS — J1U CMF MICROPLANNING
 Last review: [Insert date]
 
 KEY DECISIONS:
@@ -375,363 +1536,553 @@ ACTION ITEMS:
 
 RISKS:
 • Fabrics selection acceleration needed — decision gate Dec 2026
-• Fabric plan reajusted: -602 days vs original 656 days total`
-};
+• Fabric plan reajusted: -602 days vs original 656 days total`,
+      };
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
-let DATA = JSON.parse(JSON.stringify(DEFAULT));
+      // ─── STATE ────────────────────────────────────────────────────────────────────
+      let DATA = JSON.parse(JSON.stringify(DEFAULT));
 
-function loadData() {
-  try {
-    const saved = localStorage.getItem('j1u_cmf_data');
-    if (saved) DATA = JSON.parse(saved);
-  } catch(e) { DATA = JSON.parse(JSON.stringify(DEFAULT)); }
-}
-function saveData() {
-  try { localStorage.setItem('j1u_cmf_data', JSON.stringify(DATA)); } catch(e) {}
-}
+      function loadData() {
+        try {
+          const saved = localStorage.getItem("j1u_cmf_data");
+          if (saved) DATA = JSON.parse(saved);
+        } catch (e) {
+          DATA = JSON.parse(JSON.stringify(DEFAULT));
+        }
+      }
+      function saveData() {
+        try {
+          localStorage.setItem("j1u_cmf_data", JSON.stringify(DATA));
+        } catch (e) {}
+      }
 
-// ─── NAV ─────────────────────────────────────────────────────────────────────
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.getElementById('nav-' + id).classList.add('active');
-  renderPage(id);
-}
+      // ─── NAV ─────────────────────────────────────────────────────────────────────
+      function showPage(id) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+        document.getElementById("page-" + id).classList.add("active");
+        document.getElementById("nav-" + id).classList.add("active");
+        renderPage(id);
+      }
 
-function renderPage(id) {
-  if (id === 'overview')   renderOverview();
-  if (id === 'milestones') renderMilestones();
-  if (id === 'decisions')  renderDecisions();
-  if (id === 'fabrics')    renderStreamTable('fabrics');
-  if (id === 'paints')     renderStreamTable('paints');
-  if (id === 'textures')   renderStreamTable('textures');
-  if (id === 'notes')      renderNotes();
-  if (id === 'rawjson')    refreshRawJSON();
-}
+      function renderPage(id) {
+        if (id === "overview") renderOverview();
+        if (id === "milestones") renderMilestones();
+        if (id === "decisions") renderDecisions();
+        if (id === "fabrics") renderStreamTable("fabrics");
+        if (id === "paints") renderStreamTable("paints");
+        if (id === "textures") renderStreamTable("textures");
+        if (id === "notes") renderNotes();
+        if (id === "rawjson") refreshRawJSON();
+      }
 
-// ─── OVERVIEW ────────────────────────────────────────────────────────────────
-function renderOverview() {
-  const cfg = DATA.config;
-  document.getElementById('cfg-projectCode').value = cfg.projectCode || '';
-  document.getElementById('cfg-projectName').value = cfg.projectName || '';
-  document.getElementById('cfg-sopDate').value = cfg.sopDate || '';
-  document.getElementById('cfg-sopLabel').value = cfg.sopLabel || '';
-  document.getElementById('cfg-timelineStart').value = cfg.timelineStart || '';
-  document.getElementById('cfg-timelineEnd').value = cfg.timelineEnd || '';
-  document.getElementById('cfg-nextGate').value = cfg.nextGate || '';
-  document.getElementById('cfg-nextGateDetail').value = cfg.nextGateDetail || '';
+      // ─── OVERVIEW ────────────────────────────────────────────────────────────────
+      function renderOverview() {
+        const cfg = DATA.config;
+        document.getElementById("cfg-projectCode").value =
+          cfg.projectCode || "";
+        document.getElementById("cfg-projectName").value =
+          cfg.projectName || "";
+        document.getElementById("cfg-sopDate").value = cfg.sopDate || "";
+        document.getElementById("cfg-sopLabel").value = cfg.sopLabel || "";
+        document.getElementById("cfg-timelineStart").value =
+          cfg.timelineStart || "";
+        document.getElementById("cfg-timelineEnd").value =
+          cfg.timelineEnd || "";
+        document.getElementById("cfg-nextGate").value = cfg.nextGate || "";
+        document.getElementById("cfg-nextGateDetail").value =
+          cfg.nextGateDetail || "";
 
-  const streams = ['fabrics','paints','textures'];
-  const colors = {fabrics:'#06b6d4', paints:'#f97316', textures:'#a78bfa'};
-  const icons = {fabrics:'🧵', paints:'🎨', textures:'🔲'};
-  let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">';
-  streams.forEach(s => {
-    const acts = DATA.activities[s] || [];
-    const ok = acts.filter(a => a.status === 'OK').length;
-    const tbc = acts.filter(a => a.status === 'TBC').length;
-    const pct = acts.length ? Math.round(ok/acts.length*100) : 0;
-    html += `<div class="kpi-box" style="border-top:3px solid ${colors[s]}">
-      <div style="font-size:13px;font-weight:600;color:${colors[s]};margin-bottom:12px">${icons[s]} ${s.charAt(0).toUpperCase()+s.slice(1)}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
-        <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:#22c55e;font-family:'DM Mono',monospace">${ok}</div><div style="font-size:10px;color:var(--muted)">Done</div></div>
-        <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:#f59e0b;font-family:'DM Mono',monospace">${tbc}</div><div style="font-size:10px;color:var(--muted)">TBC</div></div>
-        <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:var(--muted);font-family:'DM Mono',monospace">${acts.length-ok-tbc}</div><div style="font-size:10px;color:var(--muted)">Pending</div></div>
+        const streams = ["fabrics", "paints", "textures"];
+        const colors = {
+          fabrics: "#06b6d4",
+          paints: "#f97316",
+          textures: "#a78bfa",
+        };
+        const icons = { fabrics: "🧵", paints: "🎨", textures: "🔲" };
+        let html = '<div class="grid grid-cols-3 gap-4">';
+        streams.forEach((s) => {
+          const acts = DATA.activities[s] || [];
+          const ok = acts.filter((a) => a.status === "OK").length;
+          const tbc = acts.filter((a) => a.status === "TBC").length;
+          const pct = acts.length ? Math.round((ok / acts.length) * 100) : 0;
+          html += `<div class="bg-surface border border-border rounded-[10px] p-4" style="border-top:3px solid ${colors[s]}">
+      <div class="text-[13px] font-semibold mb-3" style="color:${colors[s]}">${icons[s]} ${s.charAt(0).toUpperCase() + s.slice(1)}</div>
+      <div class="grid grid-cols-3 gap-2 mb-3">
+        <div class="text-center"><div class="text-[22px] font-bold text-ok tabular-nums tracking-tight">${ok}</div><div class="text-[10px] text-muted">Done</div></div>
+        <div class="text-center"><div class="text-[22px] font-bold text-warn tabular-nums tracking-tight">${tbc}</div><div class="text-[10px] text-muted">TBC</div></div>
+        <div class="text-center"><div class="text-[22px] font-bold text-muted tabular-nums tracking-tight">${acts.length - ok - tbc}</div><div class="text-[10px] text-muted">Pending</div></div>
       </div>
-      <div style="background:var(--surface2);border-radius:4px;height:6px;overflow:hidden">
-        <div style="height:100%;width:${pct}%;background:${colors[s]};border-radius:4px"></div>
+      <div class="bg-surface2 rounded h-1.5 overflow-hidden">
+        <div class="h-full rounded" style="width:${pct}%;background:${colors[s]}"></div>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px">${pct}% complete · ${acts.length} total activities</div>
+      <div class="text-[11px] text-muted mt-1.5">${pct}% complete · ${acts.length} total activities</div>
     </div>`;
-  });
-  html += '</div>';
-  document.getElementById('overview-kpis').innerHTML = html;
-}
+        });
+        html += "</div>";
+        document.getElementById("overview-kpis").innerHTML = html;
+      }
 
-function saveCfg() {
-  DATA.config = {
-    projectCode:    document.getElementById('cfg-projectCode').value,
-    projectName:    document.getElementById('cfg-projectName').value,
-    sopDate:        document.getElementById('cfg-sopDate').value,
-    sopLabel:       document.getElementById('cfg-sopLabel').value,
-    timelineStart:  document.getElementById('cfg-timelineStart').value,
-    timelineEnd:    document.getElementById('cfg-timelineEnd').value,
-    nextGate:       document.getElementById('cfg-nextGate').value,
-    nextGateDetail: document.getElementById('cfg-nextGateDetail').value,
-  };
-  saveData(); toast('Settings saved!');
-}
+      function saveCfg() {
+        DATA.config = {
+          projectCode: document.getElementById("cfg-projectCode").value,
+          projectName: document.getElementById("cfg-projectName").value,
+          sopDate: document.getElementById("cfg-sopDate").value,
+          sopLabel: document.getElementById("cfg-sopLabel").value,
+          timelineStart: document.getElementById("cfg-timelineStart").value,
+          timelineEnd: document.getElementById("cfg-timelineEnd").value,
+          nextGate: document.getElementById("cfg-nextGate").value,
+          nextGateDetail: document.getElementById("cfg-nextGateDetail").value,
+        };
+        saveData();
+        toast("Settings saved!");
+      }
 
-// ─── MILESTONES ───────────────────────────────────────────────────────────────
-const streamColors = {fabrics:'#06b6d4', paints:'#f97316', textures:'#a78bfa'};
-const statusOpts = ['done','active','upcoming','delayed','tbc'];
+      // ─── MILESTONES ───────────────────────────────────────────────────────────────
+      const streamColors = {
+        fabrics: "#06b6d4",
+        paints: "#f97316",
+        textures: "#a78bfa",
+      };
+      const statusOpts = ["done", "active", "upcoming", "delayed", "tbc"];
 
-function renderMilestones() {
-  const streams = ['fabrics','paints','textures'];
-  let html = '';
-  streams.forEach(s => {
-    const ms = DATA.milestones.filter(m => m.stream === s);
-    html += `<div class="section-divider" style="color:${streamColors[s]}">${s.toUpperCase()} MILESTONES <button class="btn btn-secondary btn-sm" onclick="openAddMilestone('${s}')">+ Add</button></div>`;
-    html += '<div class="milestone-grid" style="margin-bottom:20px">';
-    ms.forEach(m => {
-      const sc = { done:'var(--ok)', active:'var(--accent)', upcoming:'var(--muted)', delayed:'var(--risk)', tbc:'var(--warn)' }[m.status] || 'var(--muted)';
-      html += `<div class="milestone-card">
-        <div class="m-stream" style="color:${streamColors[s]}">${s}</div>
-        <input class="form-input" style="margin-bottom:8px;font-weight:600" value="${m.name}" onchange="updateMilestone('${m.id}','name',this.value)">
-        <div class="form-grid" style="grid-template-columns:1fr 1fr">
-          <div class="form-group"><div class="form-label">Date</div>
+      function renderMilestones() {
+        const streams = ["fabrics", "paints", "textures"];
+        let html = "";
+        streams.forEach((s) => {
+          const ms = DATA.milestones.filter((m) => m.stream === s);
+          html += `<div class="text-[11px] font-semibold uppercase tracking-widest py-2.5 px-0 border-b border-border mb-3.5 flex items-center justify-between" style="color:${streamColors[s]}">${s.toUpperCase()} MILESTONES <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border" onclick="openAddMilestone('${s}')">+ Add</button></div>`;
+          html +=
+            '<div class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3.5 mb-5">';
+          ms.forEach((m) => {
+            const sc =
+              {
+                done: "var(--ok)",
+                active: "var(--accent)",
+                upcoming: "var(--muted)",
+                delayed: "var(--risk)",
+                tbc: "var(--warn)",
+              }[m.status] || "var(--muted)";
+            html += `<div class="bg-surface2 border border-border rounded-[10px] p-4">
+        <div class="text-[10px] font-bold uppercase tracking-[0.07em] mb-1.5" style="color:${streamColors[s]}">${s}</div>
+        <input class="form-input mb-2 font-semibold" value="${m.name}" onchange="updateMilestone('${m.id}','name',this.value)">
+        <div class="grid grid-cols-2 gap-[14px]">
+          <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Date</div>
             <input class="form-input" type="date" value="${m.date}" onchange="updateMilestone('${m.id}','date',this.value)"></div>
-          <div class="form-group"><div class="form-label">Status</div>
+          <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Status</div>
             <select class="form-select" onchange="updateMilestone('${m.id}','status',this.value)">
-              ${statusOpts.map(o=>`<option value="${o}" ${m.status===o?'selected':''}>${o}</option>`).join('')}
+              ${statusOpts.map((o) => `<option value="${o}" ${m.status === o ? "selected" : ""}>${o}</option>`).join("")}
             </select></div>
         </div>
-        <div style="margin-top:10px;display:flex;justify-content:flex-end">
-          <button class="btn btn-danger btn-sm" onclick="deleteMilestone('${m.id}')">✕ Remove</button>
+        <div class="mt-2.5 flex justify-end">
+          <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-risk/10 text-risk border border-risk/25 hover:bg-risk/20" onclick="deleteMilestone('${m.id}')">✕ Remove</button>
         </div>
       </div>`;
-    });
-    html += '</div>';
-  });
-  document.getElementById('milestones-content').innerHTML = html;
-}
+          });
+          html += "</div>";
+        });
+        document.getElementById("milestones-content").innerHTML = html;
+      }
 
-function updateMilestone(id, field, val) {
-  const m = DATA.milestones.find(x => x.id === id);
-  if (m) { m[field] = val; saveData(); }
-}
-function deleteMilestone(id) {
-  if (!confirm('Remove this milestone?')) return;
-  DATA.milestones = DATA.milestones.filter(m => m.id !== id);
-  saveData(); renderMilestones(); toast('Milestone removed');
-}
-function openAddMilestone(stream) {
-  openModal('Add Milestone', 'Add a new milestone gate', `
-    <div class="form-grid">
-      <div class="form-group"><div class="form-label">Stream</div>
+      function updateMilestone(id, field, val) {
+        const m = DATA.milestones.find((x) => x.id === id);
+        if (m) {
+          m[field] = val;
+          saveData();
+        }
+      }
+      function deleteMilestone(id) {
+        if (!confirm("Remove this milestone?")) return;
+        DATA.milestones = DATA.milestones.filter((m) => m.id !== id);
+        saveData();
+        renderMilestones();
+        toast("Milestone removed");
+      }
+      function openAddMilestone(stream) {
+        openModal(
+          "Add Milestone",
+          "Add a new milestone gate",
+          `
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]">
+      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Stream</div>
         <select class="form-select" id="nm-stream">
-          <option value="fabrics" ${stream==='fabrics'?'selected':''}>Fabrics</option>
-          <option value="paints" ${stream==='paints'?'selected':''}>Paints</option>
-          <option value="textures" ${stream==='textures'?'selected':''}>Textures</option>
+          <option value="fabrics" ${stream === "fabrics" ? "selected" : ""}>Fabrics</option>
+          <option value="paints" ${stream === "paints" ? "selected" : ""}>Paints</option>
+          <option value="textures" ${stream === "textures" ? "selected" : ""}>Textures</option>
         </select></div>
-      <div class="form-group"><div class="form-label">Name</div><input class="form-input" id="nm-name" placeholder="CMF Direction"></div>
-      <div class="form-group"><div class="form-label">Date</div><input class="form-input" type="date" id="nm-date"></div>
-      <div class="form-group"><div class="form-label">Status</div>
+      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Name</div><input class="form-input" id="nm-name" placeholder="CMF Direction"></div>
+      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Date</div><input class="form-input" type="date" id="nm-date"></div>
+      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Status</div>
         <select class="form-select" id="nm-status">
-          ${statusOpts.map(o=>`<option value="${o}">${o}</option>`).join('')}
+          ${statusOpts.map((o) => `<option value="${o}">${o}</option>`).join("")}
         </select></div>
-    </div>`, () => {
-    DATA.milestones.push({ id:'m'+Date.now(), stream:document.getElementById('nm-stream').value, name:document.getElementById('nm-name').value, date:document.getElementById('nm-date').value, status:document.getElementById('nm-status').value });
-    saveData(); renderMilestones(); closeModal(); toast('Milestone added!');
-  });
-}
+    </div>`,
+          () => {
+            DATA.milestones.push({
+              id: "m" + Date.now(),
+              stream: document.getElementById("nm-stream").value,
+              name: document.getElementById("nm-name").value,
+              date: document.getElementById("nm-date").value,
+              status: document.getElementById("nm-status").value,
+            });
+            saveData();
+            renderMilestones();
+            closeModal();
+            toast("Milestone added!");
+          },
+        );
+      }
 
-// ─── DECISIONS ────────────────────────────────────────────────────────────────
-const priorityLabels = { urgent:'🔴 Urgent', medium:'🟡 Medium', info:'🔵 Info' };
+      // ─── DECISIONS ────────────────────────────────────────────────────────────────
+      const priorityLabels = {
+        urgent: "🔴 Urgent",
+        medium: "🟡 Medium",
+        info: "🔵 Info",
+      };
 
-function renderDecisions() {
-  let html = '';
-  DATA.decisions.forEach(d => {
-    html += `<div class="card" style="border-left:3px solid ${d.priority==='urgent'?'var(--risk)':d.priority==='medium'?'var(--warn)':'var(--accent)'}">
-      <div class="card-body" style="padding:16px">
-        <div class="form-grid" style="grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:8px">
-          <div class="form-group"><div class="form-label">Title</div><input class="form-input" value="${d.title}" onchange="updateDecision('${d.id}','title',this.value)"></div>
-          <div class="form-group"><div class="form-label">Stream</div>
+      function renderDecisions() {
+        let html = "";
+        DATA.decisions.forEach((d) => {
+          const borderColor =
+            d.priority === "urgent"
+              ? "var(--risk)"
+              : d.priority === "medium"
+                ? "var(--warn)"
+                : "var(--accent)";
+          html += `<div class="bg-surface border border-border rounded-xl mb-4 overflow-hidden" style="border-left:3px solid ${borderColor}">
+      <div class="p-4">
+        <div class="grid grid-cols-[2fr_1fr_1fr] gap-3 mb-2">
+          <div class="flex flex-col gap-1"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Title</div><input class="form-input" value="${d.title}" onchange="updateDecision('${d.id}','title',this.value)"></div>
+          <div class="flex flex-col gap-1"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Stream</div>
             <select class="form-select" onchange="updateDecision('${d.id}','stream',this.value)">
-              <option value="fabrics" ${d.stream==='fabrics'?'selected':''}>Fabrics</option>
-              <option value="paints" ${d.stream==='paints'?'selected':''}>Paints</option>
-              <option value="textures" ${d.stream==='textures'?'selected':''}>Textures</option>
-              <option value="all" ${d.stream==='all'?'selected':''}>All Streams</option>
+              <option value="fabrics" ${d.stream === "fabrics" ? "selected" : ""}>Fabrics</option>
+              <option value="paints" ${d.stream === "paints" ? "selected" : ""}>Paints</option>
+              <option value="textures" ${d.stream === "textures" ? "selected" : ""}>Textures</option>
+              <option value="all" ${d.stream === "all" ? "selected" : ""}>All Streams</option>
             </select></div>
-          <div class="form-group"><div class="form-label">Priority</div>
+          <div class="flex flex-col gap-1"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Priority</div>
             <select class="form-select" onchange="updateDecision('${d.id}','priority',this.value)">
-              <option value="urgent" ${d.priority==='urgent'?'selected':''}>🔴 Urgent</option>
-              <option value="medium" ${d.priority==='medium'?'selected':''}>🟡 Medium</option>
-              <option value="info" ${d.priority==='info'?'selected':''}>🔵 Info</option>
+              <option value="urgent" ${d.priority === "urgent" ? "selected" : ""}>🔴 Urgent</option>
+              <option value="medium" ${d.priority === "medium" ? "selected" : ""}>🟡 Medium</option>
+              <option value="info" ${d.priority === "info" ? "selected" : ""}>🔵 Info</option>
             </select></div>
         </div>
-        <div class="form-group" style="margin-bottom:8px"><div class="form-label">Detail</div>
+        <div class="flex flex-col gap-1 mb-2"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Detail</div>
           <textarea class="form-textarea" style="min-height:56px" onchange="updateDecision('${d.id}','detail',this.value)">${d.detail}</textarea></div>
-        <div style="display:flex;justify-content:flex-end"><button class="btn btn-danger btn-sm" onclick="deleteDecision('${d.id}')">✕ Remove</button></div>
+        <div class="flex justify-end"><button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-risk/10 text-risk border border-risk/25 hover:bg-risk/20" onclick="deleteDecision('${d.id}')">✕ Remove</button></div>
       </div>
     </div>`;
-  });
-  document.getElementById('decisions-list').innerHTML = html;
-}
+        });
+        document.getElementById("decisions-list").innerHTML = html;
+      }
 
-function updateDecision(id, field, val) {
-  const d = DATA.decisions.find(x => x.id === id);
-  if (d) { d[field] = val; saveData(); }
-}
-function deleteDecision(id) {
-  if (!confirm('Remove this decision item?')) return;
-  DATA.decisions = DATA.decisions.filter(d => d.id !== id);
-  saveData(); renderDecisions(); toast('Item removed');
-}
-function openAddDecision() {
-  openModal('Add Decision Item','', `
-    <div class="form-grid">
-      <div class="form-group" style="grid-column:1/-1"><div class="form-label">Title</div><input class="form-input" id="nd-title" placeholder="Decision title..."></div>
-      <div class="form-group"><div class="form-label">Stream</div>
+      function updateDecision(id, field, val) {
+        const d = DATA.decisions.find((x) => x.id === id);
+        if (d) {
+          d[field] = val;
+          saveData();
+        }
+      }
+      function deleteDecision(id) {
+        if (!confirm("Remove this decision item?")) return;
+        DATA.decisions = DATA.decisions.filter((d) => d.id !== id);
+        saveData();
+        renderDecisions();
+        toast("Item removed");
+      }
+      function openAddDecision() {
+        openModal(
+          "Add Decision Item",
+          "",
+          `
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]">
+      <div class="flex flex-col gap-[5px] col-span-full"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Title</div><input class="form-input" id="nd-title" placeholder="Decision title..."></div>
+      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Stream</div>
         <select class="form-select" id="nd-stream">
           <option value="fabrics">Fabrics</option><option value="paints">Paints</option><option value="textures">Textures</option><option value="all">All</option>
         </select></div>
-      <div class="form-group"><div class="form-label">Priority</div>
+      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Priority</div>
         <select class="form-select" id="nd-priority">
           <option value="urgent">🔴 Urgent</option><option value="medium">🟡 Medium</option><option value="info">🔵 Info</option>
         </select></div>
     </div>
-    <div class="form-group"><div class="form-label">Detail</div><textarea class="form-textarea" id="nd-detail" placeholder="Describe what decision is needed..."></textarea></div>
-  `, () => {
-    DATA.decisions.push({ id:'d'+Date.now(), title:document.getElementById('nd-title').value, stream:document.getElementById('nd-stream').value, priority:document.getElementById('nd-priority').value, detail:document.getElementById('nd-detail').value });
-    saveData(); renderDecisions(); closeModal(); toast('Decision item added!');
-  });
-}
+    <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Detail</div><textarea class="form-textarea" id="nd-detail" placeholder="Describe what decision is needed..."></textarea></div>
+  `,
+          () => {
+            DATA.decisions.push({
+              id: "d" + Date.now(),
+              title: document.getElementById("nd-title").value,
+              stream: document.getElementById("nd-stream").value,
+              priority: document.getElementById("nd-priority").value,
+              detail: document.getElementById("nd-detail").value,
+            });
+            saveData();
+            renderDecisions();
+            closeModal();
+            toast("Decision item added!");
+          },
+        );
+      }
 
-// ─── STREAM TABLES ────────────────────────────────────────────────────────────
-const statusOptions = ['OK','TBC','Pending','Risk'];
-const statusClass = { OK:'s-ok', TBC:'s-tbc', Pending:'s-pending', Risk:'s-risk' };
+      // ─── STREAM TABLES ────────────────────────────────────────────────────────────
+      const statusOptions = ["OK", "TBC", "Pending", "Risk"];
+      const statusClass = {
+        OK: "s-ok",
+        TBC: "s-tbc",
+        Pending: "s-pending",
+        Risk: "s-risk",
+      };
 
-function renderStreamTable(stream) {
-  const acts = DATA.activities[stream] || [];
-  let html = `<div class="card"><div class="card-header"><div class="card-title">${acts.length} Activities</div>
-    <div style="font-size:11px;color:var(--muted)">Click any cell to edit inline · changes auto-save</div></div>
-  <div style="overflow-x:auto"><table class="data-table"><thead><tr>
-    <th style="width:48px">#</th><th>Activity Name</th><th>Responsible</th><th style="width:110px">Date</th><th style="width:90px">Status</th><th>Observations</th><th style="width:70px">Actions</th>
+      function renderStreamTable(stream) {
+        const acts = DATA.activities[stream] || [];
+        let html = `<div class="bg-surface border border-border rounded-xl mb-4 overflow-hidden"><div class="py-[14px] px-[20px] border-b border-border flex items-center justify-between"><div class="text-[14px] font-semibold">${acts.length} Activities</div>
+    <div class="text-[11px] text-muted">Click any cell to edit inline · changes auto-save</div></div>
+  <div class="overflow-x-auto"><table class="data-table"><thead><tr>
+    <th class="w-12">#</th><th>Activity Name</th><th>Responsible</th><th class="w-[110px]">Date</th><th class="w-[90px]">Status</th><th>Observations</th><th class="w-[70px]">Actions</th>
   </tr></thead><tbody id="tbody-${stream}">`;
 
-  acts.forEach(a => {
-    html += `<tr id="row-${a.id}">
+        acts.forEach((a) => {
+          html += `<tr id="row-${a.id}">
       <td><span class="inline-edit" contenteditable="true" onblur="updateActivity('${stream}','${a.id}','num',this.textContent.trim())">${a.num}</span></td>
-      <td><span class="inline-edit" contenteditable="true" style="min-width:200px;display:block" onblur="updateActivity('${stream}','${a.id}','name',this.textContent.trim())">${a.name}</span></td>
+      <td><span class="inline-edit min-w-[200px] block" contenteditable="true" onblur="updateActivity('${stream}','${a.id}','name',this.textContent.trim())">${a.name}</span></td>
       <td><span class="inline-edit" contenteditable="true" onblur="updateActivity('${stream}','${a.id}','responsible',this.textContent.trim())">${a.responsible}</span></td>
-      <td><input class="inline-edit" type="date" value="${a.date||''}" onchange="updateActivity('${stream}','${a.id}','date',this.value)" style="width:108px"></td>
+      <td><input class="inline-edit w-[108px]" type="date" value="${a.date || ""}" onchange="updateActivity('${stream}','${a.id}','date',this.value)"></td>
       <td>
-        <select class="form-select" style="padding:4px 8px;font-size:11px" onchange="updateActivity('${stream}','${a.id}','status',this.value)">
-          ${statusOptions.map(o=>`<option value="${o}" ${a.status===o?'selected':''}>${o}</option>`).join('')}
+        <select class="form-select py-1 px-2 text-[11px]" onchange="updateActivity('${stream}','${a.id}','status',this.value)">
+          ${statusOptions.map((o) => `<option value="${o}" ${a.status === o ? "selected" : ""}>${o}</option>`).join("")}
         </select>
       </td>
-      <td><span class="inline-edit" contenteditable="true" style="min-width:120px;display:block;color:var(--muted);font-size:11px" onblur="updateActivity('${stream}','${a.id}','obs',this.textContent.trim())">${a.obs||''}</span></td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteActivity('${stream}','${a.id}')">✕</button></td>
+      <td><span class="inline-edit min-w-[120px] block text-muted text-[11px]" contenteditable="true" onblur="updateActivity('${stream}','${a.id}','obs',this.textContent.trim())">${a.obs || ""}</span></td>
+      <td><button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-risk/10 text-risk border border-risk/25 hover:bg-risk/20" onclick="deleteActivity('${stream}','${a.id}')">✕</button></td>
     </tr>`;
-  });
-  html += '</tbody></table></div></div>';
-  document.getElementById('stream-table-' + stream).innerHTML = html;
-}
+        });
+        html += "</tbody></table></div></div>";
+        document.getElementById("stream-table-" + stream).innerHTML = html;
+      }
 
-function updateActivity(stream, id, field, val) {
-  const a = (DATA.activities[stream]||[]).find(x => x.id === id);
-  if (a) { a[field] = val; saveData(); }
-}
-function deleteActivity(stream, id) {
-  if (!confirm('Remove this activity?')) return;
-  DATA.activities[stream] = DATA.activities[stream].filter(a => a.id !== id);
-  saveData(); renderStreamTable(stream); toast('Activity removed');
-}
-function openAddActivity(stream) {
-  openModal('Add Activity', `Add to ${stream}`, `
-    <div class="form-grid">
-      <div class="form-group"><div class="form-label">Number / ID</div><input class="form-input" id="na-num" placeholder="e.g. 5.2"></div>
-      <div class="form-group"><div class="form-label">Status</div>
+      function updateActivity(stream, id, field, val) {
+        const a = (DATA.activities[stream] || []).find((x) => x.id === id);
+        if (a) {
+          a[field] = val;
+          saveData();
+        }
+      }
+      function deleteActivity(stream, id) {
+        if (!confirm("Remove this activity?")) return;
+        DATA.activities[stream] = DATA.activities[stream].filter(
+          (a) => a.id !== id,
+        );
+        saveData();
+        renderStreamTable(stream);
+        toast("Activity removed");
+      }
+      function openAddActivity(stream) {
+        openModal(
+          "Add Activity",
+          `Add to ${stream}`,
+          `
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]">
+      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Number / ID</div><input class="form-input" id="na-num" placeholder="e.g. 5.2"></div>
+      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Status</div>
         <select class="form-select" id="na-status">
-          ${statusOptions.map(o=>`<option value="${o}">${o}</option>`).join('')}
+          ${statusOptions.map((o) => `<option value="${o}">${o}</option>`).join("")}
         </select></div>
     </div>
-    <div class="form-group" style="margin-bottom:12px"><div class="form-label">Activity Name</div><input class="form-input" id="na-name" placeholder="Activity description..."></div>
-    <div class="form-grid">
-      <div class="form-group"><div class="form-label">Responsible</div><input class="form-input" id="na-resp" placeholder="Design / Compras"></div>
-      <div class="form-group"><div class="form-label">Date</div><input class="form-input" type="date" id="na-date"></div>
+    <div class="flex flex-col gap-[5px] mb-3"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Activity Name</div><input class="form-input" id="na-name" placeholder="Activity description..."></div>
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-[14px] mb-[14px]">
+      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Responsible</div><input class="form-input" id="na-resp" placeholder="Design / Compras"></div>
+      <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Date</div><input class="form-input" type="date" id="na-date"></div>
     </div>
-    <div class="form-group"><div class="form-label">Observations</div><textarea class="form-textarea" id="na-obs" style="min-height:56px"></textarea></div>
-  `, () => {
-    if (!DATA.activities[stream]) DATA.activities[stream] = [];
-    DATA.activities[stream].push({ id:'a'+Date.now(), num:document.getElementById('na-num').value, name:document.getElementById('na-name').value, responsible:document.getElementById('na-resp').value, status:document.getElementById('na-status').value, date:document.getElementById('na-date').value, obs:document.getElementById('na-obs').value });
-    saveData(); renderStreamTable(stream); closeModal(); toast('Activity added!');
-  });
-}
+    <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Observations</div><textarea class="form-textarea" id="na-obs" style="min-height:56px"></textarea></div>
+  `,
+          () => {
+            if (!DATA.activities[stream]) DATA.activities[stream] = [];
+            DATA.activities[stream].push({
+              id: "a" + Date.now(),
+              num: document.getElementById("na-num").value,
+              name: document.getElementById("na-name").value,
+              responsible: document.getElementById("na-resp").value,
+              status: document.getElementById("na-status").value,
+              date: document.getElementById("na-date").value,
+              obs: document.getElementById("na-obs").value,
+            });
+            saveData();
+            renderStreamTable(stream);
+            closeModal();
+            toast("Activity added!");
+          },
+        );
+      }
 
-// ─── NOTES ────────────────────────────────────────────────────────────────────
-let notesTimer;
-function renderNotes() {
-  document.getElementById('notes-editor').value = DATA.notes || '';
-}
-function autoSaveNotes() {
-  clearTimeout(notesTimer);
-  document.getElementById('notes-saved-indicator').textContent = 'Editing...';
-  notesTimer = setTimeout(() => {
-    DATA.notes = document.getElementById('notes-editor').value;
-    saveData();
-    document.getElementById('notes-saved-indicator').textContent = '✓ Auto-saved ' + new Date().toLocaleTimeString();
-  }, 800);
-}
+      // ─── NOTES ────────────────────────────────────────────────────────────────────
+      let notesTimer;
+      function renderNotes() {
+        document.getElementById("notes-editor").value = DATA.notes || "";
+      }
+      function autoSaveNotes() {
+        clearTimeout(notesTimer);
+        document.getElementById("notes-saved-indicator").textContent =
+          "Editing...";
+        notesTimer = setTimeout(() => {
+          DATA.notes = document.getElementById("notes-editor").value;
+          saveData();
+          document.getElementById("notes-saved-indicator").textContent =
+            "✓ Auto-saved " + new Date().toLocaleTimeString();
+        }, 800);
+      }
 
-// ─── RAW JSON ────────────────────────────────────────────────────────────────
-function refreshRawJSON() {
-  document.getElementById('raw-json-area').value = JSON.stringify(DATA, null, 2);
-}
-function applyRawJSON() {
-  try {
-    DATA = JSON.parse(document.getElementById('raw-json-area').value);
-    saveData(); toast('JSON applied!');
-  } catch(e) { toast('Invalid JSON: ' + e.message, true); }
-}
+      // ─── RAW JSON ────────────────────────────────────────────────────────────────
+      function refreshRawJSON() {
+        document.getElementById("raw-json-area").value = JSON.stringify(
+          DATA,
+          null,
+          2,
+        );
+      }
+      function applyRawJSON() {
+        try {
+          DATA = JSON.parse(document.getElementById("raw-json-area").value);
+          saveData();
+          toast("JSON applied!");
+        } catch (e) {
+          toast("Invalid JSON: " + e.message, true);
+        }
+      }
 
-// ─── MODAL ────────────────────────────────────────────────────────────────────
-let _modalSaveFn;
-function openModal(title, sub, bodyHTML, saveFn) {
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-sub').textContent = sub;
-  document.getElementById('modal-body').innerHTML = bodyHTML;
-  document.getElementById('modal-overlay').classList.add('open');
-  _modalSaveFn = saveFn;
-  document.getElementById('modal-save-btn').onclick = saveFn;
-}
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-document.getElementById('modal-overlay').addEventListener('click', e => { if(e.target === document.getElementById('modal-overlay')) closeModal(); });
+      // ─── MODAL ────────────────────────────────────────────────────────────────────
+      let _modalSaveFn;
+      function openModal(title, sub, bodyHTML, saveFn) {
+        document.getElementById("modal-title").textContent = title;
+        document.getElementById("modal-sub").textContent = sub;
+        document.getElementById("modal-body").innerHTML = bodyHTML;
+        document
+          .getElementById("modal-overlay")
+          .classList.replace("hidden", "flex");
+        _modalSaveFn = saveFn;
+        document.getElementById("modal-save-btn").onclick = saveFn;
+      }
+      function closeModal() {
+        document
+          .getElementById("modal-overlay")
+          .classList.replace("flex", "hidden");
+      }
+      document
+        .getElementById("modal-overlay")
+        .addEventListener("click", (e) => {
+          if (e.target === document.getElementById("modal-overlay"))
+            closeModal();
+        });
 
-// ─── IMPORT / EXPORT ─────────────────────────────────────────────────────────
-function exportJSON() {
-  const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'J1U_CMF_Data_' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  toast('JSON exported!');
-}
-function importJSON(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    try {
-      DATA = JSON.parse(ev.target.result);
-      saveData();
-      toast('Data imported successfully!');
-      renderPage(document.querySelector('.nav-item.active').id.replace('nav-',''));
-    } catch(err) { toast('Import failed: ' + err.message, true); }
-  };
-  r.readAsText(file);
-  e.target.value = '';
-}
+      // ─── IMPORT / EXPORT ─────────────────────────────────────────────────────────
+      function exportJSON() {
+        const blob = new Blob([JSON.stringify(DATA, null, 2)], {
+          type: "application/json",
+        });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download =
+          "J1U_CMF_Data_" + new Date().toISOString().slice(0, 10) + ".json";
+        a.click();
+        toast("JSON exported!");
+      }
+      function importJSON(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const r = new FileReader();
+        r.onload = (ev) => {
+          try {
+            DATA = JSON.parse(ev.target.result);
+            saveData();
+            toast("Data imported successfully!");
+            renderPage(
+              document.querySelector(".nav-item.active").id.replace("nav-", ""),
+            );
+          } catch (err) {
+            toast("Import failed: " + err.message, true);
+          }
+        };
+        r.readAsText(file);
+        e.target.value = "";
+      }
 
-// ─── SAVE ALL ─────────────────────────────────────────────────────────────────
-function saveAll() {
-  DATA.notes = document.getElementById('notes-editor').value || DATA.notes;
-  saveData();
-  toast('All data saved! Dashboard will reflect changes.');
-}
+      // ─── SAVE ALL ─────────────────────────────────────────────────────────────────
+      function saveAll() {
+        DATA.notes =
+          document.getElementById("notes-editor").value || DATA.notes;
+        saveData();
+        toast("All data saved! Dashboard will reflect changes.");
+      }
 
-// ─── TOAST ────────────────────────────────────────────────────────────────────
-function toast(msg, isError) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (isError ? ' error' : '') + ' show';
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
+      // ─── TOAST ────────────────────────────────────────────────────────────────────
+      function toast(msg, isError) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        // Apply visual error state if needed
+        if (isError) {
+          t.classList.replace("bg-ok", "bg-risk");
+          t.classList.replace("text-black", "text-white");
+        } else {
+          t.classList.replace("bg-risk", "bg-ok");
+          t.classList.replace("text-white", "text-black");
+        }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-loadData();
-renderOverview();
-</script>
-</body>
+        // Slide up toast
+        t.classList.remove("translate-y-[80px]");
+
+        // Slide down (hide) after 3s
+        setTimeout(() => {
+          t.classList.add("translate-y-[80px]");
+        }, 3000);
+      }
+
+      // ─── THEME TOGGLE ──────────────────────────────────────────────────────────────
+      function applyTheme(light) {
+        document.documentElement.classList.toggle("light", light);
+        document.getElementById("t-icon").textContent = light ? "🌙" : "☀️";
+        document.getElementById("t-label").textContent = light
+          ? "Dark Mode"
+          : "Light Mode";
+      }
+      function toggleTheme() {
+        const goLight = !document.documentElement.classList.contains("light");
+        applyTheme(goLight);
+        try {
+          localStorage.setItem("j1u_theme", goLight ? "light" : "dark");
+        } catch (e) {}
+      }
+      // Init theme from saved preference
+      (function () {
+        try {
+          const saved = localStorage.getItem("j1u_theme");
+          if (saved === "light") applyTheme(true);
+        } catch (e) {}
+      })();
+
+      // ─── INIT ────────────────────────────────────────────────────────────────────
+      loadData();
+      renderPage("overview");
+      window.addEventListener("storage", (e) => {
+        if (e.key === "j1u_cmf_data") {
+          loadData();
+          const active =
+            document.querySelector(".nav-item.active")?.id?.replace("nav-", "") ||
+            "overview";
+          renderPage(active);
+        }
+        if (e.key === "j1u_theme") {
+          try {
+            const saved = localStorage.getItem("j1u_theme");
+            applyTheme(saved === "light");
+          } catch (error) {}
+        }
+      });
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal();
+      });
+    </script>
+  </body>
 </html>
