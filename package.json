@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "CMF Microplanning Dashboard",
   "scripts": {
-    "build": "node ./node_modules/shx/lib/cli.js mkdir -p ./dist && node ./node_modules/tailwindcss/lib/cli.js -i ./src/styles/main.css -o ./styles.css --minify && node ./node_modules/shx/lib/cli.js cp ./styles.css ./dist/ && node ./node_modules/shx/lib/cli.js cp J1U_CMF_Dashboard.html ./dist/ && node ./node_modules/shx/lib/cli.js cp J1U_CMF_Editor.html ./dist/",
+    "build": "node ./node_modules/shx/lib/cli.js mkdir -p ./dist ./dist/js ./dist/data && node ./node_modules/tailwindcss/lib/cli.js -i ./src/styles/main.css -o ./styles.css --minify && node ./node_modules/shx/lib/cli.js cp ./styles.css ./dist/ && node ./node_modules/shx/lib/cli.js cp J1U_CMF_Dashboard.html ./dist/ && node ./node_modules/shx/lib/cli.js cp J1U_CMF_Editor.html ./dist/ && node ./node_modules/shx/lib/cli.js cp ./src/js/dashboard.js ./dist/js/ && node ./node_modules/shx/lib/cli.js cp ./src/data/DEFAULT_DATA.json ./dist/data/",
     "dev": "npm run build:css -- --watch",
     "serve": "python3 -m http.server 3000 -d ./dist",
     "start": "npm run serve",
-    "build:css": "node ./node_modules/shx/lib/cli.js mkdir -p ./dist && node ./node_modules/tailwindcss/lib/cli.js -i ./src/styles/main.css -o ./styles.css && node ./node_modules/shx/lib/cli.js cp ./styles.css ./dist/"
+    "build:css": "node ./node_modules/shx/lib/cli.js mkdir -p ./dist ./dist/js ./dist/data && node ./node_modules/tailwindcss/lib/cli.js -i ./src/styles/main.css -o ./styles.css && node ./node_modules/shx/lib/cli.js cp ./styles.css ./dist/ && node ./node_modules/shx/lib/cli.js cp ./src/js/dashboard.js ./dist/js/ && node ./node_modules/shx/lib/cli.js cp ./src/data/DEFAULT_DATA.json ./dist/data/"
   },
   "devDependencies": {
     "caniuse-lite": "^1.0.30001700",

@@ -1,21 +1,115 @@
 let DEFAULT_DATA;
 let DATA;
+const EMPTY_DATA = {
+  config: {
+    projectCode: 'J1U',
+    projectName: 'CMF Microplanning',
+    sopDate: '',
+    sopLabel: '',
+    timelineStart: '',
+    timelineEnd: '',
+    nextGate: '',
+    nextGateDetail: ''
+  },
+  milestones: [],
+  phases: { fabrics: [], paints: [], textures: [] },
+  activities: { fabrics: [], paints: [], textures: [] },
+  decisions: [],
+  notes: ''
+};
+
+function cloneDefaultData() {
+  return JSON.parse(JSON.stringify(DEFAULT_DATA || EMPTY_DATA));
+}
+
+function normalizeDecisionItem(item, index) {
+  if (!item || typeof item !== 'object') return null;
+  const rawPriority = (item.priority || item.severity || item.level || 'info').toString().toLowerCase();
+  const priority = ['urgent', 'medium', 'info'].includes(rawPriority) ? rawPriority : 'info';
+  const rawStream = (item.stream || item.category || item.area || 'all').toString().toLowerCase();
+  const stream = ['fabrics', 'paints', 'textures', 'all'].includes(rawStream) ? rawStream : 'all';
+  const title = item.title || item.name || item.label || item.summary || item.decision || 'Untitled decision';
+  const detail = item.detail || item.description || item.notes || item.reason || '';
+  return {
+    id: item.id || `decision-${index + 1}`,
+    title,
+    stream,
+    priority,
+    detail
+  };
+}
+
+function normalizeData(data) {
+  const normalized = { ...cloneDefaultData(), ...(data && typeof data === 'object' ? data : {}) };
+  const decisionsSource =
+    Array.isArray(normalized.decisions) ? normalized.decisions :
+    Array.isArray(normalized.criticalDecisions) ? normalized.criticalDecisions :
+    Array.isArray(normalized.critical_decisions) ? normalized.critical_decisions :
+    Array.isArray(normalized.decisionsNeeded) ? normalized.decisionsNeeded :
+    [];
+  normalized.decisions = decisionsSource.map(normalizeDecisionItem).filter(Boolean);
+  return normalized;
+}
+
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function deriveCriticalDecisions() {
+  const derived = [];
+  const streams = ['fabrics', 'paints', 'textures'];
+
+  streams.forEach(stream => {
+    const activities = (DATA.activities && DATA.activities[stream]) || [];
+    activities
+      .filter(activity => activity && (activity.status === 'Risk' || activity.status === 'TBC'))
+      .slice(0, 3)
+      .forEach((activity, index) => {
+        derived.push({
+          id: `derived-${stream}-${activity.id || index}`,
+          title: `${SL[stream]} · ${activity.name || 'Critical activity'}`,
+          stream,
+          priority: activity.status === 'Risk' ? 'urgent' : 'medium',
+          detail: `Activity ${activity.num || '—'} is ${activity.status}${activity.obs ? ` — ${activity.obs}` : ''}`
+        });
+      });
+  });
+
+  return derived.slice(0, 6);
+}
+
+function getRenderableDecisions() {
+  const explicitDecisions = Array.isArray(DATA.decisions) ? DATA.decisions.filter(Boolean) : [];
+  return explicitDecisions.length ? explicitDecisions : deriveCriticalDecisions();
+}
 
 async function loadInitialData() {
-  try {
-    const response = await fetch('data/DEFAULT_DATA.json');
-    DEFAULT_DATA = await response.json();
-  } catch (e) {
-    console.error('Failed to load default data', e);
+  const candidates = ['data/DEFAULT_DATA.json', 'src/data/DEFAULT_DATA.json'];
+  for (const path of candidates) {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) continue;
+      DEFAULT_DATA = await response.json();
+      return;
+    } catch (e) {
+      // Try the next known location.
+    }
   }
+  DEFAULT_DATA = cloneDefaultData();
+  console.error('Failed to load default data from known paths');
 }
 
 function loadData() {
   try {
     const s = localStorage.getItem('j1u_cmf_data');
-    DATA = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+    DATA = normalizeData(s ? JSON.parse(s) : cloneDefaultData());
   } catch (e) {
-    DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    DATA = normalizeData(cloneDefaultData());
   }
 }
 
@@ -81,8 +175,6 @@ function renderStreams() {
   const streams = ['fabrics', 'paints', 'textures'];
   const hl = { fabrics: '⚠ In Progress', paints: '⚠ On Track', textures: '✓ Advanced' };
   const hc = { fabrics: 'h-warn', paints: 'h-warn', textures: 'h-ok' };
-  const sl = { done: '✓ Done', active: '▶ Active', upcoming: 'Upcoming', delayed: '⚠ Delayed', tbc: 'TBC' };
-  const sc = { done: 's-done', active: 's-active', upcoming: 's-upcoming', delayed: 's-delayed', tbc: 's-tbc' };
   const colors = SC();
   let html = '';
   streams.forEach(s => {
@@ -92,7 +184,6 @@ function renderStreams() {
     const pend = acts.length - ok - tbc;
     const pp = acts.length ? Math.round(ok / acts.length * 100) : 0;
     const color = colors[s];
-    const ms = DATA.milestones || [];
     html += `<div class="bg-surface border border-border rounded-[13px] overflow-hidden stream-card hover:border-accent hover:-translate-y-[2px]">
       <div class="py-[15px] px-[19px] border-b border-border flex items-start justify-between">
         <div><div class="text-[19px] mb-1">${SI[s]}</div>
@@ -109,14 +200,6 @@ function renderStreams() {
           <div class="bg-surface2 rounded-md py-2 px-2.5 text-center"><div class="text-[17px] font-normal" style="color:var(--ok)">${ok}</div><div class="text-[10px] text-muted uppercase mt-[1px] tracking-wider">Done</div></div>
           <div class="bg-surface2 rounded-md py-2 px-2.5 text-center"><div class="text-[17px] font-normal" style="color:var(--warn)">${tbc}</div><div class="text-[10px] text-muted uppercase mt-[1px] tracking-wider">TBC</div></div>
           <div class="bg-surface2 rounded-md py-2 px-2.5 text-center"><div class="text-[17px] font-normal" style="color:var(--muted)">${pend}</div><div class="text-[10px] text-muted uppercase mt-[1px] tracking-wider">Pending</div></div>
-        </div>
-        <div class="text-[10px] text-muted uppercase tracking-[0.09em] mb-2">Program Gates</div>
-        <div class="flex flex-col gap-1.5">
-          ${ms.map(m => {
-      const isA = m.status === 'active';
-      const activeBg = isA ? `background:${color}1a;border:1px solid ${color}33` : '';
-      return `<div class="flex items-center justify-between py-1.5 px-2.5 rounded-md bg-surface2 phase-row" ${isA ? `style="${activeBg}"` : ''}><span class="text-[11px]" ${isA ? `style="color:${color}"` : ''}>${m.name}</span><span class="text-[10px] text-muted tracking-wide">${fmtDate(m.date)}</span><span class="text-[10px] py-[2px] px-2 rounded-full uppercase tracking-wider ${sc[m.status] || 's-upcoming'}">${sl[m.status] || m.status}</span></div>`;
-    }).join('')}
         </div>
       </div>
     </div>`;
@@ -301,11 +384,13 @@ function renderTimeline() {
 
 // ── RENDER DECISIONS ──────────────────────────────────────────────────────────
 function renderDecisions() {
-  const html = DATA.decisions.map(d => {
+  const decisions = getRenderableDecisions();
+  const html = decisions.map(d => {
     const borderLeft = d.priority === 'urgent' ? 'border-l-risk' : (d.priority === 'medium' ? 'border-l-warn' : 'border-l-accent');
+    const streamLabel = d.stream === 'all' ? 'ALL' : (d.stream || 'all').toUpperCase();
     return `<div class="py-2.5 px-3 bg-surface2 rounded-md border-l-[3px] border-l-transparent mb-2 decision-item ${borderLeft}">
-      <div class="text-xs mb-1">${d.title}<span class="text-[9px] py-0.5 px-1.5 rounded ml-1.5 tracking-wider uppercase stream-tag tag-${d.stream}">${d.stream.toUpperCase()}</span></div>
-      <div class="text-[11px] text-muted leading-relaxed">${d.detail}</div>
+      <div class="text-xs mb-1">${escapeHTML(d.title)}<span class="text-[9px] py-0.5 px-1.5 rounded ml-1.5 tracking-wider uppercase stream-tag tag-${d.stream || 'all'}">${escapeHTML(streamLabel)}</span></div>
+      <div class="text-[11px] text-muted leading-relaxed">${escapeHTML(d.detail || 'No detail provided.')}</div>
     </div>`
   }).join('');
   document.getElementById('decisions-panel').innerHTML = html || `<div style="color:var(--muted);font-size:13px">No decisions flagged.</div>`;
