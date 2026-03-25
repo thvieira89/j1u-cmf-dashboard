@@ -1540,19 +1540,73 @@ RISKS:
       };
 
       // ─── STATE ────────────────────────────────────────────────────────────────────
+      const STORAGE_KEY = "j1u_cmf_data";
+      const THEME_KEY = "j1u_theme";
+      const STREAMS = ["fabrics", "paints", "textures"];
+      const STREAM_META = {
+        fabrics: { color: "#06b6d4", icon: "🧵", label: "Fabrics" },
+        paints: { color: "#f97316", icon: "🎨", label: "Paints" },
+        textures: { color: "#a78bfa", icon: "🔲", label: "Textures" },
+      };
+      const MILESTONE_STATUS_OPTIONS = [
+        "done",
+        "active",
+        "upcoming",
+        "delayed",
+        "tbc",
+      ];
+      const ACTIVITY_STATUS_OPTIONS = ["OK", "TBC", "Pending", "Risk"];
+      const PAGE_RENDERERS = {
+        overview: renderOverview,
+        milestones: renderMilestones,
+        decisions: renderDecisions,
+        fabrics: () => renderStreamTable("fabrics"),
+        paints: () => renderStreamTable("paints"),
+        textures: () => renderStreamTable("textures"),
+        notes: renderNotes,
+        rawjson: refreshRawJSON,
+      };
       let DATA = JSON.parse(JSON.stringify(DEFAULT));
+
+      function cloneDefaultData() {
+        return JSON.parse(JSON.stringify(DEFAULT));
+      }
+
+      function getActivePageId() {
+        return (
+          document.querySelector(".nav-item.active")?.id?.replace("nav-", "") ||
+          "overview"
+        );
+      }
+
+      function getActivities(stream) {
+        return DATA.activities[stream] || [];
+      }
+
+      function getStreamSummary(stream) {
+        const activities = getActivities(stream);
+        const done = activities.filter((activity) => activity.status === "OK").length;
+        const tbc = activities.filter((activity) => activity.status === "TBC").length;
+        return {
+          total: activities.length,
+          done,
+          tbc,
+          pending: activities.length - done - tbc,
+          progress: activities.length ? Math.round((done / activities.length) * 100) : 0,
+        };
+      }
 
       function loadData() {
         try {
-          const saved = localStorage.getItem("j1u_cmf_data");
+          const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) DATA = JSON.parse(saved);
         } catch (e) {
-          DATA = JSON.parse(JSON.stringify(DEFAULT));
+          DATA = cloneDefaultData();
         }
       }
       function saveData() {
         try {
-          localStorage.setItem("j1u_cmf_data", JSON.stringify(DATA));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
         } catch (e) {}
       }
 
@@ -1570,14 +1624,8 @@ RISKS:
       }
 
       function renderPage(id) {
-        if (id === "overview") renderOverview();
-        if (id === "milestones") renderMilestones();
-        if (id === "decisions") renderDecisions();
-        if (id === "fabrics") renderStreamTable("fabrics");
-        if (id === "paints") renderStreamTable("paints");
-        if (id === "textures") renderStreamTable("textures");
-        if (id === "notes") renderNotes();
-        if (id === "rawjson") refreshRawJSON();
+        const renderer = PAGE_RENDERERS[id] || PAGE_RENDERERS.overview;
+        renderer();
       }
 
       // ─── OVERVIEW ────────────────────────────────────────────────────────────────
@@ -1597,30 +1645,21 @@ RISKS:
         document.getElementById("cfg-nextGateDetail").value =
           cfg.nextGateDetail || "";
 
-        const streams = ["fabrics", "paints", "textures"];
-        const colors = {
-          fabrics: "#06b6d4",
-          paints: "#f97316",
-          textures: "#a78bfa",
-        };
-        const icons = { fabrics: "🧵", paints: "🎨", textures: "🔲" };
         let html = '<div class="grid grid-cols-3 gap-4">';
-        streams.forEach((s) => {
-          const acts = DATA.activities[s] || [];
-          const ok = acts.filter((a) => a.status === "OK").length;
-          const tbc = acts.filter((a) => a.status === "TBC").length;
-          const pct = acts.length ? Math.round((ok / acts.length) * 100) : 0;
-          html += `<div class="bg-surface border border-border rounded-[10px] p-4" style="border-top:3px solid ${colors[s]}">
-      <div class="text-[13px] font-semibold mb-3" style="color:${colors[s]}">${icons[s]} ${s.charAt(0).toUpperCase() + s.slice(1)}</div>
+        STREAMS.forEach((stream) => {
+          const meta = STREAM_META[stream];
+          const summary = getStreamSummary(stream);
+          html += `<div class="bg-surface border border-border rounded-[10px] p-4" style="border-top:3px solid ${meta.color}">
+      <div class="text-[13px] font-semibold mb-3" style="color:${meta.color}">${meta.icon} ${meta.label}</div>
       <div class="grid grid-cols-3 gap-2 mb-3">
-        <div class="text-center"><div class="text-[22px] font-bold text-ok tabular-nums tracking-tight">${ok}</div><div class="text-[10px] text-muted">Done</div></div>
-        <div class="text-center"><div class="text-[22px] font-bold text-warn tabular-nums tracking-tight">${tbc}</div><div class="text-[10px] text-muted">TBC</div></div>
-        <div class="text-center"><div class="text-[22px] font-bold text-muted tabular-nums tracking-tight">${acts.length - ok - tbc}</div><div class="text-[10px] text-muted">Pending</div></div>
+        <div class="text-center"><div class="text-[22px] font-bold text-ok tabular-nums tracking-tight">${summary.done}</div><div class="text-[10px] text-muted">Done</div></div>
+        <div class="text-center"><div class="text-[22px] font-bold text-warn tabular-nums tracking-tight">${summary.tbc}</div><div class="text-[10px] text-muted">TBC</div></div>
+        <div class="text-center"><div class="text-[22px] font-bold text-muted tabular-nums tracking-tight">${summary.pending}</div><div class="text-[10px] text-muted">Pending</div></div>
       </div>
       <div class="bg-surface2 rounded h-1.5 overflow-hidden">
-        <div class="h-full rounded" style="width:${pct}%;background:${colors[s]}"></div>
+        <div class="h-full rounded" style="width:${summary.progress}%;background:${meta.color}"></div>
       </div>
-      <div class="text-[11px] text-muted mt-1.5">${pct}% complete · ${acts.length} total activities</div>
+      <div class="text-[11px] text-muted mt-1.5">${summary.progress}% complete · ${summary.total} total activities</div>
     </div>`;
         });
         html += "</div>";
@@ -1643,39 +1682,23 @@ RISKS:
       }
 
       // ─── MILESTONES ───────────────────────────────────────────────────────────────
-      const streamColors = {
-        fabrics: "#06b6d4",
-        paints: "#f97316",
-        textures: "#a78bfa",
-      };
-      const statusOpts = ["done", "active", "upcoming", "delayed", "tbc"];
-
       function renderMilestones() {
-        const streams = ["fabrics", "paints", "textures"];
         let html = "";
-        streams.forEach((s) => {
+        STREAMS.forEach((s) => {
           const ms = DATA.milestones.filter((m) => m.stream === s);
-          html += `<div class="text-[11px] font-semibold uppercase tracking-widest py-2.5 px-0 border-b border-border mb-3.5 flex items-center justify-between" style="color:${streamColors[s]}">${s.toUpperCase()} MILESTONES <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border" onclick="openAddMilestone('${s}')">+ Add</button></div>`;
+          html += `<div class="text-[11px] font-semibold uppercase tracking-widest py-2.5 px-0 border-b border-border mb-3.5 flex items-center justify-between" style="color:${STREAM_META[s].color}">${s.toUpperCase()} MILESTONES <button class="py-[5px] px-[12px] text-[11px] rounded-lg font-semibold cursor-pointer font-sans transition-all duration-150 bg-surface2 text-text border border-border hover:bg-border" onclick="openAddMilestone('${s}')">+ Add</button></div>`;
           html +=
             '<div class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3.5 mb-5">';
           ms.forEach((m) => {
-            const sc =
-              {
-                done: "var(--ok)",
-                active: "var(--accent)",
-                upcoming: "var(--muted)",
-                delayed: "var(--risk)",
-                tbc: "var(--warn)",
-              }[m.status] || "var(--muted)";
             html += `<div class="bg-surface2 border border-border rounded-[10px] p-4">
-        <div class="text-[10px] font-bold uppercase tracking-[0.07em] mb-1.5" style="color:${streamColors[s]}">${s}</div>
+        <div class="text-[10px] font-bold uppercase tracking-[0.07em] mb-1.5" style="color:${STREAM_META[s].color}">${s}</div>
         <input class="form-input mb-2 font-semibold" value="${m.name}" onchange="updateMilestone('${m.id}','name',this.value)">
         <div class="grid grid-cols-2 gap-[14px]">
           <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Date</div>
             <input class="form-input" type="date" value="${m.date}" onchange="updateMilestone('${m.id}','date',this.value)"></div>
           <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Status</div>
             <select class="form-select" onchange="updateMilestone('${m.id}','status',this.value)">
-              ${statusOpts.map((o) => `<option value="${o}" ${m.status === o ? "selected" : ""}>${o}</option>`).join("")}
+              ${MILESTONE_STATUS_OPTIONS.map((o) => `<option value="${o}" ${m.status === o ? "selected" : ""}>${o}</option>`).join("")}
             </select></div>
         </div>
         <div class="mt-2.5 flex justify-end">
@@ -1718,7 +1741,7 @@ RISKS:
       <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Date</div><input class="form-input" type="date" id="nm-date"></div>
       <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Status</div>
         <select class="form-select" id="nm-status">
-          ${statusOpts.map((o) => `<option value="${o}">${o}</option>`).join("")}
+          ${MILESTONE_STATUS_OPTIONS.map((o) => `<option value="${o}">${o}</option>`).join("")}
         </select></div>
     </div>`,
           () => {
@@ -1738,12 +1761,6 @@ RISKS:
       }
 
       // ─── DECISIONS ────────────────────────────────────────────────────────────────
-      const priorityLabels = {
-        urgent: "🔴 Urgent",
-        medium: "🟡 Medium",
-        info: "🔵 Info",
-      };
-
       function renderDecisions() {
         let html = "";
         DATA.decisions.forEach((d) => {
@@ -1829,16 +1846,8 @@ RISKS:
       }
 
       // ─── STREAM TABLES ────────────────────────────────────────────────────────────
-      const statusOptions = ["OK", "TBC", "Pending", "Risk"];
-      const statusClass = {
-        OK: "s-ok",
-        TBC: "s-tbc",
-        Pending: "s-pending",
-        Risk: "s-risk",
-      };
-
       function renderStreamTable(stream) {
-        const acts = DATA.activities[stream] || [];
+        const acts = getActivities(stream);
         let html = `<div class="bg-surface border border-border rounded-xl mb-4 overflow-hidden"><div class="py-[14px] px-[20px] border-b border-border flex items-center justify-between"><div class="text-[14px] font-semibold">${acts.length} Activities</div>
     <div class="text-[11px] text-muted">Click any cell to edit inline · changes auto-save</div></div>
   <div class="overflow-x-auto"><table class="data-table"><thead><tr>
@@ -1853,7 +1862,7 @@ RISKS:
       <td><input class="inline-edit w-[108px]" type="date" value="${a.date || ""}" onchange="updateActivity('${stream}','${a.id}','date',this.value)"></td>
       <td>
         <select class="form-select py-1 px-2 text-[11px]" onchange="updateActivity('${stream}','${a.id}','status',this.value)">
-          ${statusOptions.map((o) => `<option value="${o}" ${a.status === o ? "selected" : ""}>${o}</option>`).join("")}
+          ${ACTIVITY_STATUS_OPTIONS.map((o) => `<option value="${o}" ${a.status === o ? "selected" : ""}>${o}</option>`).join("")}
         </select>
       </td>
       <td><span class="inline-edit min-w-[120px] block text-muted text-[11px]" contenteditable="true" onblur="updateActivity('${stream}','${a.id}','obs',this.textContent.trim())">${a.obs || ""}</span></td>
@@ -1889,7 +1898,7 @@ RISKS:
       <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Number / ID</div><input class="form-input" id="na-num" placeholder="e.g. 5.2"></div>
       <div class="flex flex-col gap-[5px]"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Status</div>
         <select class="form-select" id="na-status">
-          ${statusOptions.map((o) => `<option value="${o}">${o}</option>`).join("")}
+          ${ACTIVITY_STATUS_OPTIONS.map((o) => `<option value="${o}">${o}</option>`).join("")}
         </select></div>
     </div>
     <div class="flex flex-col gap-[5px] mb-3"><div class="text-[11px] font-medium text-muted uppercase tracking-[0.06em]">Activity Name</div><input class="form-input" id="na-name" placeholder="Activity description..."></div>
@@ -1954,7 +1963,6 @@ RISKS:
       }
 
       // ─── MODAL ────────────────────────────────────────────────────────────────────
-      let _modalSaveFn;
       function openModal(title, sub, bodyHTML, saveFn) {
         document.getElementById("modal-title").textContent = title;
         document.getElementById("modal-sub").textContent = sub;
@@ -1962,7 +1970,6 @@ RISKS:
         document
           .getElementById("modal-overlay")
           .classList.replace("hidden", "flex");
-        _modalSaveFn = saveFn;
         document.getElementById("modal-save-btn").onclick = saveFn;
       }
       function closeModal() {
@@ -1998,9 +2005,7 @@ RISKS:
             DATA = JSON.parse(ev.target.result);
             saveData();
             toast("Data imported successfully!");
-            renderPage(
-              document.querySelector(".nav-item.active").id.replace("nav-", ""),
-            );
+            renderPage(getActivePageId());
           } catch (err) {
             toast("Import failed: " + err.message, true);
           }
@@ -2051,13 +2056,13 @@ RISKS:
         const goLight = !document.documentElement.classList.contains("light");
         applyTheme(goLight);
         try {
-          localStorage.setItem("j1u_theme", goLight ? "light" : "dark");
+          localStorage.setItem(THEME_KEY, goLight ? "light" : "dark");
         } catch (e) {}
       }
       // Init theme from saved preference
       (function () {
         try {
-          const saved = localStorage.getItem("j1u_theme");
+          const saved = localStorage.getItem(THEME_KEY);
           if (saved === "light") applyTheme(true);
         } catch (e) {}
       })();
@@ -2066,16 +2071,13 @@ RISKS:
       loadData();
       renderPage("overview");
       window.addEventListener("storage", (e) => {
-        if (e.key === "j1u_cmf_data") {
+        if (e.key === STORAGE_KEY) {
           loadData();
-          const active =
-            document.querySelector(".nav-item.active")?.id?.replace("nav-", "") ||
-            "overview";
-          renderPage(active);
+          renderPage(getActivePageId());
         }
-        if (e.key === "j1u_theme") {
+        if (e.key === THEME_KEY) {
           try {
-            const saved = localStorage.getItem("j1u_theme");
+            const saved = localStorage.getItem(THEME_KEY);
             applyTheme(saved === "light");
           } catch (error) {}
         }

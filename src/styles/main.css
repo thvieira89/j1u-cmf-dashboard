@@ -118,7 +118,6 @@
   body.dashboard-page .timeline-card,
   body.dashboard-page .panel,
   body.dashboard-page .stat-box,
-  body.dashboard-page .phase-row,
   body.dashboard-page .decision-item,
   body.dashboard-page .notes-display,
   body.dashboard-page .sop-chip,
@@ -454,74 +453,6 @@
     text-transform: uppercase;
     margin-top: 1px;
     letter-spacing: 0.06em;
-  }
-
-  body.dashboard-page .phases-title {
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    margin-bottom: 8px;
-  }
-
-  body.dashboard-page .phases-list {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  body.dashboard-page .phase-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 10px;
-    border-radius: 6px;
-    background: var(--surface2);
-    gap: 8px;
-  }
-
-  body.dashboard-page .phase-name {
-    font-size: 11px;
-    flex: 1;
-  }
-
-  body.dashboard-page .phase-date {
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 0.03em;
-  }
-
-  body.dashboard-page .ps {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  body.dashboard-page .s-done {
-    background: rgba(52, 211, 153, 0.14);
-    color: var(--ok);
-  }
-
-  body.dashboard-page .s-active {
-    background: rgba(91, 159, 255, 0.16);
-    color: var(--accent);
-  }
-
-  body.dashboard-page .s-upcoming {
-    background: rgba(188, 188, 188, 0.12);
-    color: var(--muted);
-  }
-
-  body.dashboard-page .s-delayed {
-    background: rgba(248, 113, 113, 0.14);
-    color: var(--risk);
-  }
-
-  body.dashboard-page .s-tbc {
-    background: rgba(167, 139, 250, 0.14);
-    color: var(--pending);
   }
 
   body.dashboard-page .timeline-card {
